@@ -27,7 +27,9 @@
 
         //#region 2-Creating  perspective camera
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000); //2-Creating camera
-        camera.position.set(0,35,70);
+        //camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2,
+            //window.innerHeight / 2, window.innerHeight / -2, 0.1, 50000); //2-Creating camera
+        camera.position.set(0, 35, 70);
         camera.lookAt(scene.position); //looks at origin(0,0,0)
         //#endregion
 
@@ -144,8 +146,6 @@
         pickHelper.pick(pickPosition, renderer, pickingScene, camera);
     });
 
-    //canvas.addEventListener('mouseout', clearPickPosition);
-    //canvas.addEventListener('mouseleave', clearPickPosition);
     canvas.addEventListener('click', function (event) {
         setPickPosition(event);
         pickHelper.select(pickPosition, renderer, pickingScene, camera);
@@ -167,8 +167,16 @@
         switch (event.key) {
             case 'Delete':
                 scene.remove(pickHelper.selectedObject);
+                pickHelper.selectedObject.geometry.dispose();
+                pickHelper.selectedObject.material.dispose();
+                let index = mainBeams.indexOf(pickHelper.selectedObject.userData.beam);
+                if (index !== -1) mainBeams.splice(index, 1);
+                else { index = secondaryBeams.indexOf(pickHelper.selectedObject.userData.beam); secondaryBeams.splice(index, 1); }
                 pickingScene.remove(pickHelper.selectedObject.userData.picking)
-                nodes.nodeGroup.remove(pickHelper.selectedObject);
+                pickHelper.selectedObject.userData.picking.geometry.dispose();
+                pickHelper.selectedObject.userData.picking.material.dispose();
+                pickHelper.selectedObject = null;
+                // nodes.nodeGroup.remove(pickHelper.selectedObject);
                 break;
 
             case 'm':
@@ -201,6 +209,15 @@
 
             case 'd':
                 draw = draw ? false : true;
+                break;
+
+            case 'w':
+                mainBeams.forEach(b => {
+                    if (b.mesh.material.wireframe)
+                        b.mesh.material.wireframe = false;
+                    else
+                        b.mesh.material.wireframe = true;
+                })
                 break;
         }
         //}

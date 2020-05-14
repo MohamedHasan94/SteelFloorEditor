@@ -42,6 +42,7 @@ class GPUPickHelper {
             (pixelBuffer[0] << 16) |
             (pixelBuffer[1] << 8) |
             (pixelBuffer[2]);
+        pickingTexture.dispose();
         return id;
     }
 

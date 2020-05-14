@@ -41,6 +41,16 @@ function createMesh(shape, position, length, material, rotation) {
     return mesh;
 }
 
+function createLine(startPoint , endPoint , material, rotation) {
+    // extrudeSettings.depth = length;
+    let geometry = new THREE.BufferGeometry().setFromPoints([startPoint , endPoint]);
+    let line = new THREE.Line(geometry, material);
+    console.log(line)
+    //line.position.copy(position);
+    //line.rotation.set(rotation.x, rotation.y, rotation.z);
+    return line;
+}
+
 class Beam {
     constructor(section, startPoint, endPoint, shape, material) {
         this.section = section;
@@ -49,8 +59,12 @@ class Beam {
         this.span = this.endPoint.distanceTo(this.startPoint);
         let direction = ((new THREE.Vector3()).subVectors(endPoint, startPoint)).normalize();
         this.rotation = new THREE.Euler(0, direction.angleTo(new THREE.Vector3(0, 0, 1)), 0);
-        this.mesh = createMesh(shape, this.startPoint, this.span, material, this.rotation);
-        this.mesh.userData.beam = this;
+        // this.line = createLine(startPoint , endPoint , material , this.rotation); //Wireframe
+        // this.line.userData.beam = this;
+        this.extrusion = createMesh(shape, this.startPoint, this.span, material, this.rotation); //Extruded view
+        this.extrusion.userData.beam = this;
+        this.mesh = this.extrusion;
+        // this.mesh.userData.beam = this;
     }
     move(displacement){
         this.startPoint.add(displacement);
@@ -100,7 +114,7 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, color) {
     let shape = createShape(dimensions);
     for (let i = 0; i < coordZ.length; i++) {
         for (let j = 0; j < coordX.length - 1; j++) {
-            let material = new THREE.MeshPhongMaterial({color: color , side: THREE.DoubleSide , alphaTest: 0.5});
+        let material = new THREE.MeshPhongMaterial({color: color , side: THREE.DoubleSide , alphaTest: 0.5 /*, wireframe:true*/});
             let beam = new Beam(section, new THREE.Vector3(coordX[j], 0, coordZ[i]), new THREE.Vector3(coordX[j + 1], 0, coordZ[i]), shape, material);
             beams.push(beam);
             scene.add(beam.mesh);
@@ -108,6 +122,7 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, color) {
             pickingScene.add(new PickingObject(beam, id).mesh);
         }
     }
+    delete shape
     return beams;
 }
 
