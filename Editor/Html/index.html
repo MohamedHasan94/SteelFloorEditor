@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/Bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../Css/style.css" />
+  <title>Editor</title>
+</head>
+
+<body>
+  <button onclick="editGrids()">Edit Grids</button>
+  x<input type="text" id="x" value="0">
+  y<input type="text" id="y" value="0">
+  z<input type="text" id="z" value="0">
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Grids Spacing</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="spaceX">Spacing in X-direction</label>
+            <input type="text" name="" id="spaceX" class="form-control" value="6*6" required>
+          </div>
+            <label for="spaceZ">Spacing in Z-direction</label>
+            <input type="text" name="" id="spaceZ" class="form-control" value="6*5" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="createGrids">Create Grids</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/dependencies/three.js"></script>
+  <script src="../js/dependencies/OrbitControls.js"></script>
+  <script src="../Bootstrap/jquery-3.0.0.min.js"></script>
+  <script src="../Bootstrap/bootstrap.min.js"></script>
+  <script src="../js/Picker.js"></script>
+  <script src="../js/Beam.js"></script>
+  <script src="../js/Editor.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+
+</html>
