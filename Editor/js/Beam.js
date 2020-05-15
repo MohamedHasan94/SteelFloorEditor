@@ -95,15 +95,23 @@ function drawBeamByTwoPoints(scene , pickingScene , start, end, section , color)
     pickingScene.add(pickingBeam.mesh);
 }
 
-function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSection) {
-    let mainBeams = [], secBeams = [];
+function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSection , secSpacing) {
+    let mainBeams = [], secBeams = [] , secCoord = [0] , distribution;
     if (coordX[1] > coordZ[1]) {
         mainBeams = createZBeams(scene, pickingScene, coordX, coordZ, secSection, 0x0000ff); //Create main beams on z-axis (short direction)
-        secBeams = createXBeams(scene, pickingScene, coordX, coordZ, mainSection, 0x00ff00);  //Create secondary beams on x-axis (long direction)
+        distribution = coordZ[coordZ.length-1];
+        for (let i = 1; secCoord[i-1] < distribution; i++) {
+            secCoord[i] = secCoord[i-1] + secSpacing;            
+        }
+        secBeams = createXBeams(scene, pickingScene, coordX, secCoord, mainSection, 0x00ff00);  //Create secondary beams on x-axis (long direction)
     }
     else {
         mainBeams = createXBeams(scene, pickingScene, coordX, coordZ, mainSection, 0x0000ff); //Create main beams on x-axis (short direction)
-        secBeams = createZBeams(scene, pickingScene, coordX, coordZ, secSection, 0x00ff00);  //Create secondary beams on z-axis (long direction) 
+        distribution = coordX[coordX.length-1];
+        for (let i = 1; secCoord[i-1] < distribution; i++) {
+            secCoord[i] = secCoord[i-1] + secSpacing;            
+        }
+        secBeams = createZBeams(scene, pickingScene, secCoord, coordZ, secSection, 0x00ff00);  //Create secondary beams on z-axis (long direction) 
     }
     return [mainBeams, secBeams];
 }

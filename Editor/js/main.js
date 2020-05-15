@@ -66,10 +66,11 @@
 
     $('#createGrids').click(function () {
         $('#exampleModal').modal('hide');
-        let noInX, spaceX, noInZ, spaceZ, coordX, coordZ;
+        let noInX, spaceX, noInZ, spaceZ, secSpacing , coordX, coordZ;
         [noInX, spaceX] = $('#spaceX').val().split('*').map(s => parseFloat(s));
         [noInZ, spaceZ] = $('#spaceZ').val().split('*').map(s => parseFloat(s));
         [coordX, coordZ] = getPoints(noInX, spaceX, noInZ, spaceZ); //Get coordinates from spacings
+        secSpacing = parseFloat($('#secSpace').val());
         let editGrids = false;
         if (grids) { //Check if it is editing or creating
             scene.remove(nodes);
@@ -80,7 +81,7 @@
         myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length);
         //nodes = createNodes(scene, pickingScene, coordX, coordZ);
         if (!editGrids) {
-            [mainBeams, secondaryBeams] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200');
+            [mainBeams, secondaryBeams] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200' , secSpacing);
         }
     })
 
