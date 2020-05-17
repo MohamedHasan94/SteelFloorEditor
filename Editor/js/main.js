@@ -28,7 +28,7 @@
         //#region 2-Creating  perspective camera
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000); //2-Creating camera
         //camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2,
-            //window.innerHeight / 2, window.innerHeight / -2, 0.1, 50000); //2-Creating camera
+        //window.innerHeight / 2, window.innerHeight / -2, 0.1, 50000); //2-Creating camera
         camera.position.set(0, 35, 70);
         camera.lookAt(scene.position); //looks at origin(0,0,0)
         //#endregion
@@ -66,7 +66,7 @@
 
     $('#createGrids').click(function () {
         $('#exampleModal').modal('hide');
-        let noInX, spaceX, noInZ, spaceZ, secSpacing , coordX, coordZ;
+        let noInX, spaceX, noInZ, spaceZ, secSpacing, coordX, coordZ;
         [noInX, spaceX] = $('#spaceX').val().split('*').map(s => parseFloat(s));
         [noInZ, spaceZ] = $('#spaceZ').val().split('*').map(s => parseFloat(s));
         [coordX, coordZ] = getPoints(noInX, spaceX, noInZ, spaceZ); //Get coordinates from spacings
@@ -81,7 +81,7 @@
         myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length);
         //nodes = createNodes(scene, pickingScene, coordX, coordZ);
         if (!editGrids) {
-            [mainBeams, secondaryBeams] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200' , secSpacing);
+            [mainBeams, secondaryBeams] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200', secSpacing);
         }
     })
 
@@ -106,9 +106,8 @@
         $('#exampleModal').modal('show');
     }
 
-    function update() {
-    }
-
+    // function update() {
+    // }
 
     function getCanvasRelativePosition(event) {
         const rect = canvas.getBoundingClientRect();
@@ -124,14 +123,14 @@
         pickPosition.y = pos.y;
     }
 
-    function clearPickPosition() {
-        // unlike the mouse which always has a position
-        // if the user stops touching the screen we want
-        // to stop picking. For now we just pick a value
-        // unlikely to pick something
-        pickPosition.x = -100000;
-        pickPosition.y = -100000;
-    }
+    // function clearPickPosition() {
+    //     // unlike the mouse which always has a position
+    //     // if the user stops touching the screen we want
+    //     // to stop picking. For now we just pick a value
+    //     // unlikely to pick something
+    //     pickPosition.x = -100000;
+    //     pickPosition.y = -100000;
+    // }
 
     function loop() {
         requestAnimationFrame(loop);
@@ -190,9 +189,10 @@
             case 'c':
                 displacement = new THREE.Vector3(parseFloat($('#x').val()) || 0, parseFloat($('#y').val()) || 0, parseFloat($('#z').val()) || 0)
                 let object, pickingObject;
-                if (pickHelper.selectedObject.geometry instanceof THREE.ExtrudeGeometry) {
+                if (pickHelper.selectedObject.geometry instanceof THREE.ExtrudeBufferGeometry) {
                     object = new Beam(pickHelper.selectedObject.userData.beam.section,
-                        pickHelper.selectedObject.userData.beam.startPoint.clone(), pickHelper.selectedObject.userData.beam.endPoint.clone(),
+                        pickHelper.selectedObject.userData.beam.startPoint.clone(), 
+                        pickHelper.selectedObject.userData.beam.endPoint.clone(),
                         pickHelper.selectedObject.geometry.parameters.shapes.clone(), pickHelper.selectedObject.material.clone());
                     object.move(displacement)
                     scene.add(object.mesh)
@@ -211,16 +211,18 @@
             case 'd':
                 draw = draw ? false : true;
                 break;
-
-            case 'w':
-                mainBeams.forEach(b => {
-                    if (b.mesh.material.wireframe)
-                        b.mesh.material.wireframe = false;
-                    else
-                        b.mesh.material.wireframe = true;
-                })
-                break;
         }
         //}
     });
+
+    window.toggle = function () {
+        for (let i = 0; i < scene.children.length; i++) {
+            if (scene.children[i] instanceof THREE.Mesh/*scene.children[i].material && scene.children[i].userData.beam*/) {
+                scene.children[i].userData.beam.temp = scene.children[i].geometry;
+                scene.children[i].geometry = scene.children[i].userData.beam.unusedGeometry;
+                scene.children[i].userData.beam.unusedGeometry = scene.children[i].userData.beam.temp;
+                scene.children[i].userData.picking.geometry = scene.children[i].geometry;
+            }
+        }
+    }
 })();

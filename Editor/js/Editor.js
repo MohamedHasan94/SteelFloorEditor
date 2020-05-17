@@ -47,7 +47,9 @@ function Line(startPoint, direction, length) {
     this.length = length || 1000;
     this.endPoint = new THREE.Vector3(this.startPoint.x + this.length * this.direction.x, this.startPoint.y + this.length * this.direction.y, this.startPoint.z + this.length * this.direction.z);
     this.material = new THREE.LineDashedMaterial({
-        color: 0xff33ff,
+        color: 0x333333,
+        opacity : 0.3,
+        transparent : true,
         gapSize: 0.5,
         dashSize: 3,
         scale: 1

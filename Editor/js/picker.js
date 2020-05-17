@@ -73,7 +73,8 @@ class GPUPickHelper {
     pick(cssPosition, renderer, pickingScene, camera) {
         // restore the color if there is a picked object
         if (this.pickedObject) {
-            this.pickedObject.material.emissive.setHex(this.pickedObject.material.emissive.getHex() - this.emissiveFlash);
+            // this.pickedObject.material.emissive.setHex(this.pickedObject.material.emissive.getHex() - this.emissiveFlash);
+            this.pickedObject.material.color.setHex(this.pickedObject.material.color.getHex() - this.emissiveFlash);
             this.pickedObject = null;
         }
         let id = this.getObject(cssPosition, renderer, pickingScene, camera);
@@ -82,9 +83,10 @@ class GPUPickHelper {
             // pick the first object. It's the closest one
             this.pickedObject = intersectedObject;
             // save its color
-            this.pickedObjectSavedColor = this.pickedObject.material.emissive.getHex();
+            // this.pickedObjectSavedColor = this.pickedObject.material.emissive.getHex();
+            this.pickedObjectSavedColor = this.pickedObject.material.color.getHex();
             // set its emissive color
-            this.pickedObject.material.emissive.setHex(this.pickedObjectSavedColor + this.emissiveFlash);
+            this.pickedObject.material.color.setHex(this.pickedObjectSavedColor + this.emissiveFlash);
         }
     }
 }
