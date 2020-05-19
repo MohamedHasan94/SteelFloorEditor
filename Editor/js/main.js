@@ -79,9 +79,12 @@
             editGrids = true;
         }
         myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length);
+        let deadLoad = new LineLoad(parseFloat($('#dead').val()));
+        let liveLoad = new LineLoad(parseFloat($('#live').val()));
         //nodes = createNodes(scene, pickingScene, coordX, coordZ);
         if (!editGrids) {
-            [mainBeams, secondaryBeams] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200', secSpacing);
+            [mainBeams, secondaryBeams] = generateBeams(scene, pickingScene, coordX, coordZ,'IPE 300', 'IPE 200', 
+                secSpacing , deadLoad , liveLoad);
         }
     })
 
@@ -217,11 +220,18 @@
 
     window.toggle = function () {
         for (let i = 0; i < scene.children.length; i++) {
-            if (scene.children[i] instanceof THREE.Mesh/*scene.children[i].material && scene.children[i].userData.beam*/) {
-                scene.children[i].userData.beam.temp = scene.children[i].geometry;
-                scene.children[i].geometry = scene.children[i].userData.beam.unusedGeometry;
-                scene.children[i].userData.beam.unusedGeometry = scene.children[i].userData.beam.temp;
-                scene.children[i].userData.picking.geometry = scene.children[i].geometry;
+            if (scene.children[i].userData.beam/*scene.children[i].material && scene.children[i].userData.beam*/) {
+                scene.children[i].userData.beam.temp = scene.children[i];
+
+
+                scene.children[i].userData.beam.unusedMesh.position.copy(scene.children[i].position)
+                scene.children[i].userData.beam.unusedMesh.rotation.copy(scene.children[i].rotation)
+                
+                scene.children[i] = scene.children[i].userData.beam.unusedMesh;
+                scene.children[i].userData.beam.mesh = scene.children[i];
+
+                scene.children[i].userData.beam.unusedMesh = scene.children[i].userData.beam.temp;
+
             }
         }
     }

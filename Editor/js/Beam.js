@@ -25,125 +25,91 @@ function createShape(dimensions) {
     return shape;
 }
 
-let cylinder = (function (radius){
-    let shape = new THREE.Shape();
-    let step = Math.PI /10;
-    shape.moveTo(radius , 0);
-    for (let i = step; i < 20; i += step) {
-        shape.lineTo(radius*Math.cos(i) , radius*Math.sin(i));
-    }
-    return shape;
-})(0.03);
-
 let extrudeSettings = {
-    steps: 2,
+    steps: 1,
     bevelEnabled: false
-    //depth: length,
-    //extrudePath: path
 };
 
-// function createMesh(shape, position, length, material, rotation) {
-//     extrudeSettings.depth = length;
-//     let geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-//     let mesh = new THREE.Mesh(geometry, material);
-//     mesh.position.copy(position);
-//     mesh.rotation.set(rotation.x, rotation.y, rotation.z);
-//     return mesh;
-// }
-
-// function createLine(position , length , material , rotation/*startPoint , endPoint , material, rotation*/) {
-//     extrudeSettings.depth = length;
-//     let geometry = new THREE.ExtrudeGeometry(cylinder, extrudeSettings);
-//     let mesh = new THREE.Mesh(geometry, material);
-//     mesh.position.copy(position);
-//     mesh.rotation.set(rotation.x, rotation.y, rotation.z);
-//     return mesh;
-//     // let geometry = new THREE.CylinderBufferGeometry( 0.5, 0.5, length, 32 );
-//     /////////////////////////////////////////////////////////////////
-        
-//     // let geometry = new THREE.BufferGeometry().setFromPoints([startPoint , endPoint]);
-//     // let line = new THREE.Line(geometry, material);
-//     // //line.position.copy(position);
-//     // //line.rotation.set(rotation.x, rotation.y, rotation.z);
-//     // return line;
-// }
-
-function createExtrudedGeometry(shape , length) {
+function createExtrudedMesh(shape, length , material) {
     extrudeSettings.depth = length;
-    return new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);;
+    return new THREE.Mesh(new THREE.ExtrudeBufferGeometry(shape, extrudeSettings) ,material);
 }
 
-function createWireframe(position , length , material , rotation/*startPoint , endPoint , material, rotation*/) {
-    extrudeSettings.depth = length;
-    let geometry = new THREE.ExtrudeBufferGeometry(cylinder, extrudeSettings);
-    let mesh = new THREE.Mesh(geometry, material);
-    mesh.position.copy(position);
-    mesh.rotation.set(rotation.x, rotation.y, rotation.z);
-    return mesh;
+let lineStart = new THREE.Vector3(0, 0, 0);
+function createWireframe(startPoint , length , material , rotation ) {
+    let lineEnd = lineStart.clone().setZ(length);
+    let geometry = new THREE.BufferGeometry().setFromPoints([lineStart , lineEnd]);
+    let line = new THREE.Line(geometry, material);
+    line.position.copy(startPoint);
+    line.rotation.copy(rotation);
+    return line;
 }
 
 class Beam {
-    constructor(section, startPoint, endPoint, shape, material) {
+    constructor(section, startPoint, endPoint, shape, lineMaterial , meshMaterial) {
         this.section = section;
         this.startPoint = startPoint;
         this.endPoint = endPoint;
         this.span = this.endPoint.distanceTo(this.startPoint);
         let direction = ((new THREE.Vector3()).subVectors(endPoint, startPoint)).normalize();
         this.rotation = new THREE.Euler(0, direction.angleTo(new THREE.Vector3(0, 0, 1)), 0);
-        this.mesh = createWireframe(startPoint , this.span , material , this.rotation/*startPoint , endPoint , material , this.rotation*/); //Wireframe
-        this.unusedGeometry = createExtrudedGeometry(shape , this.span, material, this.rotation); //Extruded view
+        this.mesh = createWireframe(startPoint, this.span, lineMaterial, this.rotation); //Wireframe
+        this.unusedMesh = createExtrudedMesh(shape, this.span, meshMaterial); //Extruded view geometry
         this.mesh.userData.beam = this;
+        this.unusedMesh.userData = this.mesh.userData; //to save the same data at toggle view
         this.temp = null;
+        this.loads = [];
     }
-    move(displacement){
+    move(displacement) {
         this.startPoint.add(displacement);
         this.endPoint.add(displacement);
     }
+    addLoad(load, scene) {
+        let myLoad = new LineLoad(load.value, load.direction);
+        this.loads.push(myLoad);
+        let edges = new THREE.EdgesGeometry(myLoad.mesh.geometry);
+        let line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+        myLoad.mesh.add(line)
+
+        
+
+        let canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        let ctx = canvas.getContext("2d");
+        ctx.font = "200px bold Arial";
+        ctx.fillStyle = "black";
+        //ctx.textAlign = "right";
+        ctx.fillText(load.value, 0, 256);
+        var tex = new THREE.Texture(canvas);
+        tex.needsUpdate = true;
+        var spriteMat = new THREE.SpriteMaterial({ map: tex });
+        var sprite = new THREE.Sprite(spriteMat);
+        myLoad.mesh.add(sprite)
+        
+        myLoad.mesh.position.copy(this.startPoint);
+        //myLoad.mesh.position.add(this.direction.multiplyScalar(0.5 * this.span));
+        //myLoad.mesh.position.y += 0.5 * myLoad.value;
+        myLoad.mesh.rotation.copy(this.endPoint);
+        scene.add(myLoad.mesh);
+    }
 }
-
-
-// class Beam {
-//     constructor(section, startPoint, endPoint, shape, material) {
-//         this.section = section;
-//         this.startPoint = startPoint;
-//         this.endPoint = endPoint;
-//         this.span = this.endPoint.distanceTo(this.startPoint);
-//         let direction = ((new THREE.Vector3()).subVectors(endPoint, startPoint)).normalize();
-//         this.rotation = new THREE.Euler(0, direction.angleTo(new THREE.Vector3(0, 0, 1)), 0);
-//         // this.line = createLine(startPoint , this.span , material , this.rotation/*startPoint , endPoint , material , this.rotation*/); //Wireframe
-//         this.mesh = createLine(startPoint , this.span , material , this.rotation/*startPoint , endPoint , material , this.rotation*/); //Wireframe
-//         this.unusedMesh = createMesh(shape, this.startPoint, this.span, material, this.rotation); //Extruded view
-//         // this.extrusion.userData.beam = this;
-//         material.userData.beam = this;
-//         // this.mesh = this.line;
-//         this.temp = null;
-//         // this.mesh.userData.beam = this;
-//     }
-//     move(displacement){
-//         this.startPoint.add(displacement);
-//         this.endPoint.add(displacement);
-//     }
-// }
 
 class PickingObject {
     constructor(object, id) {
-        // let material = new THREE.MeshPhongMaterial({emissive: new THREE.Color(id) , color: new THREE.Color(0),
-        //     specular: new THREE.Color(0, 0, 0) , side: THREE.DoubleSide/* , alphaTest: 0.5 , blending: THREE.NoBlending*/});
-        let material = new THREE.LineBasicMaterial({color: new THREE.Color(id) /*, side: THREE.DoubleSide , alphaTest: 0.5 , blending: THREE.NoBlending*/});
-        //let material = new THREE.LineBasicMaterial({color: new THREE.Color(id), side: THREE.DoubleSide , linewidth : 10/* , alphaTest: 0.5 , blending: THREE.NoBlending*/});
-        this.mesh = new THREE.Mesh(object.mesh.geometry, material);
-        // this.mesh.position.copy(object.mesh.position);
+        let material = new THREE.LineBasicMaterial({ color: new THREE.Color(id) /*, side: THREE.DoubleSide , alphaTest: 0.5 , blending: THREE.NoBlending*/ });
+        this.mesh = new THREE.Line(object.mesh.geometry, material);
         this.mesh.position.copy(object.mesh.position);
         this.mesh.rotation.copy(object.mesh.rotation);
         object.mesh.userData.picking = this.mesh;
     }
 }
 
-function drawBeamByTwoPoints(scene , pickingScene , start, end, section , color) {
+function drawBeamByTwoPoints(scene, pickingScene, start, end, section, color) {
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
     let beam = new Beam(section, start, end, shape,
-        new THREE.MeshPhongMaterial({color: color , side: THREE.DoubleSide , alphaTest: 0.5}));
+        new THREE.MeshPhongMaterial({ color: color, side: THREE.DoubleSide, alphaTest: 0.5 }));
 
     scene.add(beam.mesh);
     idToObject[++id] = beam.mesh;
@@ -151,41 +117,41 @@ function drawBeamByTwoPoints(scene , pickingScene , start, end, section , color)
     pickingScene.add(pickingBeam.mesh);
 }
 
-function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSection , secSpacing) {
-    let mainBeams = [], secBeams = [] , secCoord = [0] , distribution;
+function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSection, secSpacing, dl, ll) {
+    let mainBeams = [], secBeams = [], secCoord = [0], distribution;
     if (coordX[1] > coordZ[1]) {
         mainBeams = createZBeams(scene, pickingScene, coordX, coordZ, secSection, 0x0000ff); //Create main beams on z-axis (short direction)
-        distribution = coordZ[coordZ.length-1];
-        for (let i = 1; secCoord[i-1] < distribution; i++) {
-            secCoord[i] = secCoord[i-1] + secSpacing;            
+        distribution = coordZ[coordZ.length - 1];
+        for (let i = 1; secCoord[i - 1] < distribution; i++) {
+            secCoord[i] = secCoord[i - 1] + secSpacing;
         }
-        secBeams = createXBeams(scene, pickingScene, coordX, secCoord, mainSection, 0x00ff00);  //Create secondary beams on x-axis (long direction)
+        secBeams = createXBeams(scene, pickingScene, coordX, secCoord, mainSection, 0x00ff00, dl);  //Create secondary beams on x-axis (long direction)
     }
     else {
         mainBeams = createXBeams(scene, pickingScene, coordX, coordZ, mainSection, 0x0000ff); //Create main beams on x-axis (short direction)
-        distribution = coordX[coordX.length-1];
-        for (let i = 1; secCoord[i-1] < distribution; i++) {
-            secCoord[i] = secCoord[i-1] + secSpacing;            
+        distribution = coordX[coordX.length - 1];
+        for (let i = 1; secCoord[i - 1] < distribution; i++) {
+            secCoord[i] = secCoord[i - 1] + secSpacing;
         }
         secBeams = createZBeams(scene, pickingScene, secCoord, coordZ, secSection, 0x00ff00);  //Create secondary beams on z-axis (long direction) 
     }
     return [mainBeams, secBeams];
 }
 
-let xmaterial = new THREE.MeshLambertMaterial({color: 0xff0000 /*, side: THREE.DoubleSide  , alphaTest: 0.5 , blending: THREE.NoBlending*/});
+let xLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+let xMeshMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
 
-function createXBeams(scene, pickingScene, coordX, coordZ, section, color) {
+function createXBeams(scene, pickingScene, coordX, coordZ, section, color, load) {
     let beams = [];
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
     for (let i = 0; i < coordZ.length; i++) {
         for (let j = 0; j < coordX.length - 1; j++) {
-        //let material = new THREE.MeshPhongMaterial({color: color  , alphaTest: 0.5 /*, side: THREE.DoubleSide, wireframe:true*/});
-        //let material = new THREE.LineBasicMaterial({color: color /*, side: THREE.DoubleSide  , alphaTest: 0.5 , blending: THREE.NoBlending*/});
-        let beam = new Beam(section, new THREE.Vector3(coordX[j], 0, coordZ[i]), new THREE.Vector3(coordX[j + 1], 0, coordZ[i]), shape, xmaterial.clone());
+            let beam = new Beam(section, new THREE.Vector3(coordX[j], 0, coordZ[i]), new THREE.Vector3(coordX[j + 1], 0, coordZ[i]), shape, xLineMaterial.clone() , xMeshMaterial.clone());
             beams.push(beam);
+            //beam.addLoad(load, scene);
             scene.add(beam.mesh);
-            window.idToObject[++id] = beam.mesh;
+            window.idToObject[++id] = beam;
             pickingScene.add(new PickingObject(beam, id).mesh);
         }
     }
@@ -193,7 +159,8 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, color) {
     return beams;
 }
 
-let zmaterial = new THREE.MeshLambertMaterial({color: 0x00ff00});
+let zLineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+let zMeshMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 
 function createZBeams(scene, pickingScene, coordX, coordZ, section, color) {
     let beams = [];
@@ -201,11 +168,10 @@ function createZBeams(scene, pickingScene, coordX, coordZ, section, color) {
     let shape = createShape(dimensions);
     for (let i = 0; i < coordX.length; i++) {
         for (let j = 0; j < coordZ.length - 1; j++) {
-            let material = new THREE.MeshPhongMaterial({color: color , alphaTest: 0.5 /*, side: THREE.DoubleSide*/ });
-            let beam = new Beam(section, new THREE.Vector3(coordX[i], 0, coordZ[j]), new THREE.Vector3(coordX[i], 0, coordZ[j + 1]), shape, zmaterial.clone());
+            let beam = new Beam(section, new THREE.Vector3(coordX[i], 0, coordZ[j]), new THREE.Vector3(coordX[i], 0, coordZ[j + 1]), shape, zLineMaterial.clone(),zMeshMaterial.clone());
             beams.push(beam);
             scene.add(beam.mesh);
-            window.idToObject[++id] = beam.mesh;
+            window.idToObject[++id] = beam;
             pickingScene.add(new PickingObject(beam, id).mesh);
         }
     }
