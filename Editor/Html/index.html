@@ -15,7 +15,13 @@
   y<input type="text" id="y" value="0">
   z<input type="text" id="z" value="0">
   <button onclick="toggle()">Toggle View</button>
+  <button onclick="dead()">Add Dead Load</button>
+  <button onclick="live()">Add Live Load</button>
 
+  <input type="text" id="load" placeholder="load value">
+  <button onclick="addLoad()">Add Load</button>
+  <button onclick="hideLoads()">Hide Loads</button>
+  <button onclick="showLoads()">Show Dead Loads</button>
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">

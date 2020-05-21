@@ -48,10 +48,10 @@ function Line(startPoint, direction, length) {
     this.endPoint = new THREE.Vector3(this.startPoint.x + this.length * this.direction.x, this.startPoint.y + this.length * this.direction.y, this.startPoint.z + this.length * this.direction.z);
     this.material = new THREE.LineDashedMaterial({
         color: 0x333333,
-        opacity : 0.3,
-        transparent : true,
+        opacity: 0.3,
+        transparent: true,
         gapSize: 0.5,
-        dashSize: 3,
+        dashSize: 0.5,
         scale: 1
     });
     this.geometry = new THREE.BufferGeometry().setFromPoints([this.startPoint, this.endPoint]);
@@ -59,75 +59,32 @@ function Line(startPoint, direction, length) {
     this.line.computeLineDistances();
 }
 
-
-
 function sum(a, b) {
     return a + b;
 }
 
+// function createNodes(scene, pickingScene, coordX, coordZ) {
+//     let nodeGroup = new THREE.Group();
+//     let nodes = [];
+//     let points = getPoints(coordX, coordZ);
+//     for (let i = 0; i < points.length; i++) {
+//         nodes.push(new Node(points[i], ++id));
+//         nodeGroup.add(nodes[i].mesh);
+//         window.idToObject[id] = nodes[i].mesh;
+//         pickingScene.add(new PickingNode(nodes[i], id).mesh)
+//     }
+//     nodes.nodeGroup = nodeGroup;
+//     scene.add(nodeGroup);
+//     return nodes;
+// }
 
-function createNodes(scene, pickingScene , coordX, coordZ) {
-    let nodeGroup = new THREE.Group();
-    let nodes = [];
-    let points = getPoints(coordX, coordZ);
-    for (let i = 0; i < points.length; i++) {
-        nodes.push(new Node(points[i],++id));
-        nodeGroup.add(nodes[i].mesh);
-        window.idToObject[id] = nodes[i].mesh;
-        pickingScene.add(new PickingNode(nodes[i],id).mesh)
-    }
-    nodes.nodeGroup = nodeGroup;
-    scene.add(nodeGroup);
-    return nodes;
-}
-
-function getPoints(coordX, coordZ) {
-    let accumlateX = 0, accumlateZ = 0;
-    let points = [];
-    for (let i = 0; i < coordX.length; i++) {
-        accumlateX += coordX[i];
-        for (let j = 0; j < coordZ.length; j++) {
-            accumlateZ += coordZ[j]
-            points.push({ x: accumlateX, y: 0, z: accumlateZ });
-        }
-        accumlateZ = 0;
-    }
-    return points
-}
-
+let nodeGeometry = new THREE.SphereBufferGeometry(0.1, 32, 32);
+let nodeMaterial = new THREE.MeshBasicMaterial({color: 0xffcc00});
 class Node {
-    constructor(point , id , support) {
-        var geometry = new THREE.SphereGeometry(0.05, 32, 32);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x337ab7,
-            //map: texture,
-            transparent: true,
-            side: THREE.DoubleSide,
-            alphaTest: 0.5,
-        });
-        // var material = new THREE.MeshBasicMaterial({ color: 0x337ab7 });
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.position.set(point.x, point.y, point.z);
-        this.mesh.userData.id = id;
+    constructor(coordX, coordY, coordZ, support) {
+        this.visual = {};
+        this.visual.mesh = new THREE.Mesh(nodeGeometry, nodeMaterial.clone());
+        this.visual.mesh.position.set(coordX, coordY , coordZ);
         this.support = support;
-    }
-}
-
-class PickingNode {
-    constructor(node , id) {
-        let pickingMaterial = new THREE.MeshPhongMaterial({
-            emissive: new THREE.Color(id),
-            color: new THREE.Color(0, 0, 0),
-            specular: new THREE.Color(0, 0, 0),
-            //map: texture,
-            // transparent: true,
-            side: THREE.DoubleSide,
-            alphaTest: 0.5,
-            blending: THREE.NoBlending,
-        });
-        // var material = new THREE.MeshBasicMaterial({ color: 0x337ab7 });
-        this.mesh = new THREE.Mesh(node.mesh.geometry, pickingMaterial);
-        this.mesh.position.copy(node.mesh.position);
-        node.mesh.userData.picking = this.mesh
     }
 }

@@ -6,7 +6,7 @@ class GPUPickHelper {
         this.pixelBuffer = new Uint8Array(4 * 81);
         this.pickedObject = null;
         this.selectedObject = null;
-        this.emissiveFlash = 0x11bbcc;
+        this.emissiveFlash = 0xcc5511;
     }
 
     getObject(cssPosition, renderer, pickingScene, camera) {
