@@ -1,6 +1,0 @@
-1) 4 drawing functions
-2) generate beams return nodes and secNodes plus the main and secBeam
-3) node class>>change in constructor
-4) beam class change in props
-5) removed not needed func in editor 
-I kept create node if we wanted to add point loads later
