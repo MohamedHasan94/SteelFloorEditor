@@ -79,7 +79,7 @@
             scene.remove(grids.linesInZ);
             editGrids = true;
         }
-        myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length);
+        myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length,3);
         let deadLoad = (parseFloat($('#dead').val()));
         let liveLoad = (parseFloat($('#live').val()));
         //nodes = createNodes(scene, pickingScene, coordX, coordZ);
