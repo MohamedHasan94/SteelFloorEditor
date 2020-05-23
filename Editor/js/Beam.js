@@ -1,11 +1,11 @@
-function SectionDimensions(depth) {
+function SectionDimensions(depth) { //Calculate the dimensions relative to it depth
     this.clearHeight = depth || 0.5;
     this.flangeWidth = 0.5 * depth || 0.25;
     this.webThickness = 0.03 * depth || 0.02;
     this.flangeThickness = 0.06 * depth || 0.05;
 }
 
-function createShape(dimensions) {
+function createShape(dimensions) { //draw section shape using its dimensions
     let shape = new THREE.Shape();
     let shiftX = -dimensions.flangeWidth / 2;
     let shiftY = -(dimensions.clearHeight / 2 + dimensions.flangeThickness);
@@ -36,7 +36,7 @@ function createExtrudedMesh(shape, length, material) {
 }
 
 let lineStart = new THREE.Vector3(0, 0, 0);
-function createWireframe(startPoint, length, material, rotation) {
+function createWireframe(startPoint, length, material, rotation) { //Draw line at (0,0,0) and the translate and rotate it(the same as mesh)
     let lineEnd = lineStart.clone().setZ(length);
     let geometry = new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]);
     let line = new THREE.Line(geometry, material);
@@ -45,7 +45,7 @@ function createWireframe(startPoint, length, material, rotation) {
     return line;
 }
 
-class BeamData {
+class BeamData { //Data required for analysis and design
     constructor(section, startPoint, endPoint, startNode, endNode) {
         this.section = section;
         this.startPoint = startPoint;
@@ -53,13 +53,13 @@ class BeamData {
         this.startNode = startNode;
         this.endNode = endNode;
         this.span = this.endPoint.distanceTo(this.startPoint);
-        this.loads = { dead: [], live: [] };
+        this.loads = { };
         this.innerNodes = [];
     }
 }
 
 let vector = new THREE.Vector3();
-class BeamVisual {
+class BeamVisual { // Visual data for editor
     constructor(startPoint, endPoint, shape, length, lineMaterial, meshMaterial, beam) {
         this.direction = (vector.clone().subVectors(endPoint, startPoint)).normalize();
         this.rotation = new THREE.Euler(0, this.direction.angleTo(new THREE.Vector3(0, 0, 1)), 0);
@@ -87,31 +87,47 @@ class Beam {
         return new Beam(this.section, this.startPoint, this.endPoint, this.startNode, this.endNode, this.unusedMesh.geometry.parameters.shapes.clone(),
             this.mesh.material.clone(), this.unusedMesh.material.clone());
     }
-    addLoad(type, loadCase, value, loadGroup) {
-        let load = new Load(type, loadCase, value, this.data.span);
-        this.data.loads[load.loadCase].push(load);
-        loadGroup.add(load.render(this))
+    addLoad(load, replace) {
+        // let load = new LineLoad(loadCase, value);
+        // console.log(load);
+        if (replace || !this.data.loads[load.loadCase])
+            this.data.loads[load.loadCase] = load;
+        else
+            this.data.loads[load.loadCase].value += load.value;
+    }
+    changeSection(section) {
+        let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
+        let shape = createShape(dimensions);
+        this.visual.extruded.geometry.dispose();
+        // this.visual.extruded.material.dispose();
+        extrudeSettings.depth = this.data.span;
+        this.visual.extruded.geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+        this.data.section = section;
+        console.log(this.visual.extruded)
+        console.log(this.visual.unusedMesh)
+        console.log(this.visual.mesh)
+        console.log(this.visual.wireframe)
     }
 }
 
-class PickingObject {
+class PickingObject { //The object in picking scene used to pick the original object (GPU Picking)
     constructor(object, id) {
         let material = new THREE.LineBasicMaterial({ color: new THREE.Color(id) });
         this.mesh = new THREE.Line(object.visual.mesh.geometry, material);
         this.mesh.position.copy(object.visual.mesh.position);
         this.mesh.rotation.copy(object.visual.mesh.rotation);
-        object.visual.mesh.userData.picking = this.mesh;
+        object.visual.mesh.userData.picking = this.mesh; // The object has a reference to its picking object
     }
 }
 
-
+//Automatically generate the floor system from user's input (Creates the nodes with the beams)
 function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSection, secSpacing) {
     let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [0], distribution;
     if (coordX[1] > coordZ[1]) {
         [mainBeams, nodes] = createZBeamsWithNodes(scene, pickingScene, coordX, coordZ, mainSection); //Create main beams on z-axis (short direction)
 
-        distribution = coordZ[coordZ.length - 1];
-        for (let i = 1; secCoord[i - 1] < distribution; i++) {
+        distribution = coordZ[coordZ.length - 1]; // The distance over which sec beams are distributed
+        for (let i = 1; secCoord[i - 1] < distribution; i++) { //Calculate the coordinates of sec beams
             secCoord[i] = secCoord[i - 1] + secSpacing;
         }
         [secBeams, secNodes] = createXBeams(scene, pickingScene, coordX, secCoord, secSection, coordZ, nodes, mainBeams);  //Create secondary beams on x-axis (long direction)
@@ -119,11 +135,11 @@ function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSect
     else {
         [mainBeams, nodes] = createXBeamsWithNodes(scene, pickingScene, coordX, coordZ, mainSection); //Create main beams on x-axis (short direction)
 
-        distribution = coordX[coordX.length - 1];
-        for (let i = 1; secCoord[i - 1] < distribution; i++) {
+        distribution = coordX[coordX.length - 1]; // The distance over which sec beams are distributed
+        for (let i = 1; secCoord[i - 1] < distribution; i++) { //Calculate the coordinates of sec beams
             secCoord[i] = secCoord[i - 1] + secSpacing;
         }
-        [secBeams, secNodes] = createZBeams(scene, pickingScene, secCoord, coordZ, secSection, coordX, nodes, mainBeams);  //Create secondary beams on z-axis (long direction)      
+        [secBeams, secNodes] = createZBeams(scene, pickingScene, secCoord, coordZ, secSection, coordX, nodes, mainBeams);  //Create secondary beams on z-axis (long direction)
     }
     return [mainBeams, secBeams, nodes, secNodes];
 }
@@ -132,7 +148,7 @@ function generateBeams(scene, pickingScene, coordX, coordZ, mainSection, secSect
 let lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
 let meshMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff });
 
-//Secondary beams on X
+//Secondary beams on X (Uses the existing nodes and creates the intermediate nodes)
 function createXBeams(scene, pickingScene, coordX, coordZ, section, coordZToCheck, nodes, mainBeams) {
     let beams = [];
     let secBeamsNodes = [];
@@ -187,7 +203,7 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, coordZToChec
     return [beams, secBeamsNodes];
 }
 
-//Secondary beams on Z
+//Secondary beams on Z(Uses the existing nodes and creates the intermediate nodes)
 function createZBeams(scene, pickingScene, coordX, coordZ, section, coordXToCheck, nodes, mainBeams) {
     let beams = [];
     let secBeamsNodes = [];
@@ -240,7 +256,7 @@ function createZBeams(scene, pickingScene, coordX, coordZ, section, coordXToChec
     return [beams, secBeamsNodes];
 }
 
-//Main beams on Z
+//Main beams on Z (Creates bpth beams and nodes)
 function createZBeamsWithNodes(scene, pickingScene, coordX, coordZ, section) {
     let beams = [];
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
@@ -276,7 +292,7 @@ function createZBeamsWithNodes(scene, pickingScene, coordX, coordZ, section) {
     return [beams, nodes];
 }
 
-//Main beams on X
+//Main beams on X (Creates bpth beams and nodes)
 function createXBeamsWithNodes(scene, pickingScene, coordX, coordZ, section) {
     let beams = [];
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
@@ -315,26 +331,14 @@ function createXBeamsWithNodes(scene, pickingScene, coordX, coordZ, section) {
     return [beams, nodes];
 }
 
+function drawBeamByTwoPoints(scene, pickingScene, section, startNode, endNode) {
+    let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
+    let shape = createShape(dimensions);
 
+    let beam = new Beam(section, startNode.visual.mesh.position, endNode.visual.mesh.position, shape,
+        lineMaterial.clone(), meshMaterial.clone(), startNode, endNode);
 
-
-
-
-
-
-
-
-
-
-
-// function drawBeamByTwoPoints(scene, pickingScene, start, end, section, color) {
-//     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
-//     let shape = createShape(dimensions);
-//     let beam = new Beam(section, start, end, shape,
-//         new THREE.MeshPhongMaterial({ color: color, side: THREE.DoubleSide, alphaTest: 0.5 }));
-
-//     scene.add(beam.mesh);
-//     idToObject[++id] = beam.mesh;
-//     let pickingBeam = new PickingObject(beam, id);
-//     pickingScene.add(pickingBeam.mesh);
-// }
+    scene.add(beam.visual.mesh);
+    idToObject[++id] = beam.visual;
+    pickingScene.add(new PickingObject(beam, id).mesh);
+}

@@ -19,9 +19,29 @@
   <button onclick="live()">Add Live Load</button>
 
   <input type="text" id="load" placeholder="load value">
+  <input type="checkbox" id="replace">
   <button onclick="addLoad()">Add Load</button>
   <button onclick="hideLoads()">Hide Loads</button>
-  <button onclick="showLoads()">Show Dead Loads</button>
+
+  <select id="loadCase">
+    <option value="dead">Dead</option>
+    <option value="live">Live</option>
+  </select>
+  <button onclick="showLoads()">Show Loads</button>
+
+  <input type="text" id="pointLoad" placeholder="load value">
+  <button onclick="addPointLoad()">Add Point Load</button>
+
+  <input type="text" id="section">
+  <button onclick="changeSection()">change section</button>
+
+
+
+  <input type="text" id="beamSection" disabled>
+  <input type="text" id="beamStart" disabled>
+  <input type="text" id="beamEnd" disabled>
+  <input type="text" id="beamDead" disabled>
+  <input type="text" id="beamLive" disabled>
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">

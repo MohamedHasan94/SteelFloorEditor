@@ -3,13 +3,19 @@ let myFont;
 let fontMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 loader.load('../js/dependencies/helvetiker_regular.typeface.json', function (font) {
     myFont = font;
-    delete loader;
+    loader = null;
 });
 class Load {
     constructor(type, loadCase, value) {
         this.type = type;
         this.value = value,
-        this.loadCase = loadCase;
+            this.loadCase = loadCase;
+    }
+}
+
+class LineLoad extends Load {
+    constructor(loadCase, value) {
+        super('line', loadCase, value);
     }
     render(beam) {
 
@@ -31,5 +37,30 @@ class Load {
         mesh.position.y += 0.5 * this.value;
         mesh.rotateY(Math.PI / 2 - beam.visual.mesh.rotation.y);
         return mesh;
+    }
+}
+
+
+let dir = new THREE.Vector3(0, -1, 0);
+class PointLoad extends Load {
+    constructor(loadCase, value) {
+        super('point', loadCase, value);
+    }
+    render(position) {
+        let load = this;
+        position.y += 0.5*this.value;
+        let arrow = new THREE.ArrowHelper(dir, position, 0.5*this.value, 0xcc00ff/*,0.1*this.value,0.2*this.value*/);
+        let textGeometry = new THREE.TextBufferGeometry(`${this.value}`, {
+            font: myFont,
+            size: 0.3,
+            height: 0,
+            curveSegments: 3,
+            bevelEnabled: false
+        });
+        let text = new THREE.Mesh(textGeometry, fontMaterial);
+        text.rotateX(Math.PI);
+        // text.position.y = -0.5*this.value;
+        arrow.add(text);
+        return arrow;
     }
 }

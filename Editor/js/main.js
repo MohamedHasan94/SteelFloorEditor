@@ -7,13 +7,13 @@
     let orbitControls;
     let directionalLight;
     let lightposition = [0, 5, 3];
-    let nodes = [] , secNodes = [] , myGrid = [];
+    let nodes = [], secNodes = [], myGrid = [];
     let mainBeams, secondaryBeams;
     let canvas;
     const pickPosition = { x: 0, y: 0 };
     const pickHelper = new GPUPickHelper();
     window.id = 0, window.idToObject = [];
-    window.draw = false, drawingPoints = [];
+    let draw = false, drawingPoints = [];
     let loadGroup;
     //#endregion
 
@@ -51,8 +51,8 @@
 
         //#region Creating Axess
         axes = new THREE.AxesHelper(1);
-        axes.position.set(-10,0,10);
-        axes.scale.set(5,5,5);
+        axes.position.set(-10, 0, 10);
+        axes.scale.set(5, 5, 5);
         scene.add(axes);
         //#endregion
 
@@ -84,8 +84,10 @@
         let liveLoad = (parseFloat($('#live').val()));
         //nodes = createNodes(scene, pickingScene, coordX, coordZ);
         if (!editGrids) {
-            [mainBeams, secondaryBeams, nodes, secNodes] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200',
+            let mainNodes;
+            [mainBeams, secondaryBeams, mainNodes, secNodes] = generateBeams(scene, pickingScene, coordX, coordZ, 'IPE 300', 'IPE 200',
                 secSpacing, deadLoad, liveLoad);
+            nodes = mainNodes.concat(secNodes);
         }
     })
 
@@ -144,16 +146,23 @@
     canvas.addEventListener('click', function (event) {
         setPickPosition(event);
         pickHelper.select(pickPosition, renderer, pickingScene, camera);
-        // if (draw) {
-        //     if (pickHelper.selectedObject && pickHelper.selectedObject.geometry instanceof THREE.SphereGeometry) {
-        //         drawingPoints.push(pickHelper.selectedObject.position)
-        //         pickHelper.unselect();
-        //         if (drawingPoints.length === 2) {
-        //             drawBeamByTwoPoints(drawingPoints[0], drawingPoints[1]);
-        //             drawingPoints = [];
-        //         }
-        //     }
-        // }
+        debugger
+        if (draw) {
+            if (pickHelper.selectedObject && pickHelper.selectedObject.geometry instanceof THREE.SphereBufferGeometry) {
+                drawingPoints.push(pickHelper.selectedObject.userData.node)
+                //pickHelper.selectedObject = null;
+                drawingPoints[0].visual.mesh.material.color.setHex(0xcc0000);
+                if (drawingPoints.length === 2) {
+                    let section = 'IPE 500';
+
+                    drawBeamByTwoPoints(scene, pickingScene, section, drawingPoints[0], drawingPoints[1]);
+                    drawingPoints[0].visual.mesh.material.color.setHex(0xffcc00);
+                    pickHelper.unselect();
+                    drawingPoints = [];
+                    draw = false;
+                }
+            }
+        }
     });
 
     window.addEventListener('keyup', function (event) {
@@ -205,6 +214,7 @@
                 break;
 
             case 'd':
+                debugger
                 draw = draw ? false : true;
                 break;
         }
@@ -228,39 +238,84 @@
     }
 
     window.dead = function () {
-        mainBeams.forEach(b => {
-            b.addLoad('line', 'dead', 1.5, loadGroup)
+        let deadLoad = new LineLoad('dead', 1.5);
+        secondaryBeams.forEach(b => {
+            b.addLoad(deadLoad, true);
+            loadGroup.add(deadLoad.render(b))
         });
     }
 
     window.live = function () {
+        let liveLoad = new LineLoad('live', 2);
         secondaryBeams.forEach(b => {
-            b.addLoad('line', 'live', 2, loadGroup)
+            b.addLoad(liveLoad, true);
+            loadGroup.add(liveLoad.render(b))
         });
     }
 
-    window.addLoad = function(){
-        let value = parseFloat($('#load').val());
-        if(pickHelper.selectedObject){
-            pickHelper.selectedObject.userData.beam.addLoad('line' , 'live' , value , loadGroup)
+    window.addLoad = function () {
+        let replace = $('#replace').prop('checked');;
+        let load = new LineLoad('live', parseFloat($('#load').val()));
+        if (pickHelper.selectedObject) {
+            debugger
+            pickHelper.selectedObject.userData.beam.addLoad(load, replace);
+            hideLoads();
+            loadGroup.add(pickHelper.selectedObject.userData.beam.data.loads[load.loadCase].render(pickHelper.selectedObject.userData.beam))
         }
-        else{
-            this.alert('Pease Select an object');
+        else {
+            this.alert('Please Select an object');
         }
     }
 
-    window.hideLoads = function(){
+    window.hideLoads = function () {
         for (let i = 0; i < loadGroup.children.length; i++) {
-            loadGroup.children[i].geometry.dispose();
-            loadGroup.children[i].material.dispose();
+            if (!loadGroup.children[i].children) {
+                loadGroup.children[i].geometry.dispose();
+                loadGroup.children[i].material.dispose();
+            } else {
+                loadGroup.children[i].children.forEach(c => {
+                    c.geometry.dispose();
+                    c.material.dispose();
+                })
+            }
         }
         loadGroup.children = [];
     }
 
-    window.showLoads = function(){
-        let loadCase = $('#loadCase').val() 
-        secondaryBeams.forEach(b =>{
-            loadGroup.add((b.data.loads[loadCase])[0].render(b))
+    window.showLoads = function () {
+        let loadCase = $('#loadCase').val();
+        hideLoads();
+        secondaryBeams.forEach(b => {
+            if ((b.data.loads[loadCase]))
+                loadGroup.add((b.data.loads[loadCase]).render(b))
         })
+        mainBeams.forEach(b => {
+            if ((b.data.loads[loadCase]))
+                loadGroup.add((b.data.loads[loadCase]).render(b))
+        })
+        nodes.forEach(n => {
+            if ((n.data.loads[loadCase]))
+                loadGroup.add((n.data.loads[loadCase]).render(n.visual.mesh.position))
+        })
+    }
+
+    window.addPointLoad = function () {
+        let replace = $('#replace').prop('checked');
+        let pointLoad = new PointLoad('live', parseFloat($('#pointLoad').val()));
+        if (pickHelper.selectedObject) {
+            hideLoads();
+            pickHelper.selectedObject.userData.node.addLoad(pointLoad, replace);
+            loadGroup.add(pickHelper.selectedObject.userData.node.data.loads[pointLoad.loadCase].render(pickHelper.selectedObject.position.clone()))
+        }
+        else {
+            this.alert('Please Select an object');
+        }
+    }
+
+    window.changeSection = function () {
+        if (pickHelper.selectedObject.userData.beam)
+            pickHelper.selectedObject.userData.beam.changeSection($('#section').val());
+            else
+            this.alert('Please select an element first')
     }
 })();

@@ -58,6 +58,13 @@ class GPUPickHelper {
         this.selectedObject = this.getObject(cssPosition, renderer, pickingScene, camera);
         if (this.selectedObject) {
             this.selectedObject.material.color.setHex(this.selectedObject.material.color.getHex() + this.emissiveFlash);
+            if (this.selectedObject.userData.beam) {
+                $('#beamSection').val(this.selectedObject.userData.beam.data.section);
+                $('#beamStart').val(`${this.selectedObject.userData.beam.data.startPoint.x},${this.selectedObject.userData.beam.data.startPoint.y},${this.selectedObject.userData.beam.data.startPoint.z}`);
+                $('#beamEnd').val(`${this.selectedObject.userData.beam.data.endPoint.x},${this.selectedObject.userData.beam.data.endPoint.y},${this.selectedObject.userData.beam.data.endPoint.z}`);
+                $('#beamDead').val(this.selectedObject.userData.beam.data.loads.dead ? this.selectedObject.userData.beam.data.loads.dead.value : 0);
+                $('#beamLive').val(this.selectedObject.userData.beam.data.loads.live ? this.selectedObject.userData.beam.data.loads.live.value : 0);
+            }
         }
     }
 
