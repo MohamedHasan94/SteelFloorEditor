@@ -79,7 +79,7 @@
             scene.remove(grids.linesInZ);
             editGrids = true;
         }
-        myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length);
+        myGrid = new Grid(scene, coordX, coordZ, coordX.length, coordZ.length,3);
         let deadLoad = (parseFloat($('#dead').val()));
         let liveLoad = (parseFloat($('#live').val()));
         //nodes = createNodes(scene, pickingScene, coordX, coordZ);
@@ -295,7 +295,7 @@
         })
         nodes.forEach(n => {
             if ((n.data.loads[loadCase]))
-                loadGroup.add((n.data.loads[loadCase]).render(n.visual.mesh.position))
+                loadGroup.add((n.data.loads[loadCase]).render(n.visual.mesh.position.clone()))
         })
     }
 
@@ -305,7 +305,9 @@
         if (pickHelper.selectedObject) {
             hideLoads();
             pickHelper.selectedObject.userData.node.addLoad(pointLoad, replace);
+            console.log(pickHelper.selectedObject.position)
             loadGroup.add(pickHelper.selectedObject.userData.node.data.loads[pointLoad.loadCase].render(pickHelper.selectedObject.position.clone()))
+            console.log(pickHelper.selectedObject.position)
         }
         else {
             this.alert('Please Select an object');
