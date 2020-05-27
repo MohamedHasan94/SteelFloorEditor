@@ -156,7 +156,7 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, coordZToChec
     let shape = createShape(dimensions);
 
     let nodeGroup = new THREE.Group();
-    let k = 0, m = 0;
+    let k = 0, m = 0, a=-1;
     let n = (coordZ.length - 1) / (coordZToCheck.length - 1);
 
 
@@ -172,13 +172,14 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, coordZToChec
             mainBeams[(i - m)].data.innerNodes.push(secBeamsNodes[k])
             k++;
         }
+        else { a++;}
 
         for (let j = 0; j < coordX.length - 1; j++) {
             let beam;
             if ((coordZToCheck[i / n]) / coordZ[i] == 1 || (coordZToCheck[i / n]) / (coordZ[i] + 1) == 0) {
                 beam = new Beam(section, new THREE.Vector3(coordX[j], 0, coordZ[i]), new THREE.Vector3(coordX[j + 1], 0, coordZ[i]),
-                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordZToCheck.length * j + i], nodes[coordZToCheck.length * (j + 1) + i]);
-            }
+                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordZToCheck.length * j + a], nodes[coordZToCheck.length * (j + 1) + a]);              
+                }
             else {
                 secBeamsNodes.push(new Node(coordX[j + 1], 0, coordZ[i]));
                 nodeGroup.add(secBeamsNodes[k].visual.mesh);
@@ -199,6 +200,7 @@ function createXBeams(scene, pickingScene, coordX, coordZ, section, coordZToChec
         }
     }
     // let fullNodes=nodes.concat(secBeamsNodes);
+    console.log(beams,secBeamsNodes,nodes);
     delete shape;
     return [beams, secBeamsNodes];
 }
@@ -211,7 +213,7 @@ function createZBeams(scene, pickingScene, coordX, coordZ, section, coordXToChec
     let shape = createShape(dimensions);
 
     let nodeGroup = new THREE.Group();
-    let k = 0, m = 0;
+    let k = 0, m = 0,a=-1;
     let n = (coordX.length - 1) / (coordXToCheck.length - 1);
 
 
@@ -226,12 +228,13 @@ function createZBeams(scene, pickingScene, coordX, coordZ, section, coordXToChec
             mainBeams[(i - m)].data.innerNodes.push(secBeamsNodes[k])
             k++;
         }
+        else { a++;}
 
         for (let j = 0; j < coordZ.length - 1; j++) {
             let beam;
             if ((coordXToCheck[i / n]) / coordX[i] == 1 || (coordXToCheck[i / n]) / (coordX[i] + 1) == 0) {
                 beam = new Beam(section, new THREE.Vector3(coordX[i], 0, coordZ[j]), new THREE.Vector3(coordX[i], 0, coordZ[j + 1]),
-                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordXToCheck.length * j + i], nodes[coordXToCheck.length * (j + 1) + i]);
+                    shape, lineMaterial.clone(), meshMaterial.clone(),nodes[coordXToCheck.length * j + a], nodes[coordXToCheck.length * (j + 1) + a]);
             }
             else {
                 secBeamsNodes.push(new Node(coordX[i], 0, coordZ[j + 1]));
@@ -252,6 +255,7 @@ function createZBeams(scene, pickingScene, coordX, coordZ, section, coordXToChec
     }
     secBeamsNodes.nodeGroup = nodeGroup;
     scene.add(nodeGroup);
+    console.log(beams,secBeamsNodes,nodes);
     delete shape;
     return [beams, secBeamsNodes];
 }
