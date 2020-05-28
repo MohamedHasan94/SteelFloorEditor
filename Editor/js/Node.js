@@ -1,5 +1,6 @@
 let nodeGeometry = new THREE.SphereBufferGeometry(0.1, 32, 32);
 let nodeMaterial = new THREE.MeshBasicMaterial({color: 0xffcc00});
+let id = 0;
 class Node {
     constructor(coordX, coordY, coordZ, support) {
         this.visual = {};
@@ -7,8 +8,9 @@ class Node {
         this.visual.mesh.userData.node = this;
         this.visual.mesh.position.set(coordX, coordY, coordZ);
         this.data = {};
-        this.data.support = support;
-        this.data.position = new THREE.Vector3(coordX, coordY, coordZ);
+        //this.data.support = support;
+        this.data.$id = `${++id}`; //Metadata for JSON Referencing(to reference nodes in beams)
+        this.data.position = new THREE.Vector3(coordX, coordY, coordZ);  //TODO : Switch Y & Z?!
         this.data.loads = {};
     }
     addLoad(load, replace) {

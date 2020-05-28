@@ -1,4 +1,4 @@
-function Grid(scene, spaceX, spaceZ, numberInX, numberInZ,shift) {
+function Grid(spaceX, spaceZ, numberInX, numberInZ,shift) {
     //the line extention from intersection
     // let shift = 0.05 * (spaceX[spaceX.length - 1] + spaceZ[spaceX.length - 1]);
 
@@ -24,22 +24,22 @@ function Grid(scene, spaceX, spaceZ, numberInX, numberInZ,shift) {
     this.linesInX = new THREE.Group();
     this.linesInZ = new THREE.Group();
 
-    let accumlateSpaceX = 0;
-    let accumlateSpaceZ = 0;
+    // let accumlateSpaceX = 0;
+    // let accumlateSpaceZ = 0;
 
     //Fill the horizontal Group 
     for (let i = 0; i < numberInX; i++) {
         // accumlateSpaceX += spaceX[i];
         this.linesInX.add(new Line(new THREE.Vector3(spaceX[i], 0, -shift), new THREE.Vector3(0, 0, 1), this.lineLengthInZ).line);
     }
-    scene.add(this.linesInX); //Add line Group to the scene
+    //scene.add(this.linesInX); //Add line Group to the scene
 
     //Fill the vertical Group 
     for (let i = 0; i < numberInZ; i++) {
         // accumlateSpaceZ += spaceZ[i];
         this.linesInZ.add((new Line(new THREE.Vector3(-shift, 0, spaceZ[i]), new THREE.Vector3(1, 0, 0), this.lineLengthInX)).line);
     }
-    scene.add(this.linesInZ); //Add line Group to the scene
+    //scene.add(this.linesInZ); //Add line Group to the scene
 }
 
 function Line(startPoint, direction, length) {

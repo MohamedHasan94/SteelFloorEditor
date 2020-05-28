@@ -1,10 +1,18 @@
 let loader = new THREE.FontLoader();
 let myFont;
+let loadMaterial = new THREE.MeshBasicMaterial({ color: 0xcc0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
 let fontMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-loader.load('../js/dependencies/helvetiker_regular.typeface.json', function (font) {
+/*loader.load('/Editor/js/dependencies/helvetiker_regular.typeface.json', function (font) {
     myFont = font;
     loader = null;
-});
+});*/
+
+loader.load('../js/dependencies/helvetiker_regular.typeface.json', function(font){
+    myFont = font;
+    loader = null;
+})
+
+
 class Load {
     constructor(type, loadCase, value) {
         this.type = type;
@@ -20,7 +28,7 @@ class LineLoad extends Load {
     render(beam) {
 
         let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(beam.data.span, this.value, 1, 1)
-            , new THREE.MeshBasicMaterial({ color: 0xcc0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+            , loadMaterial.clone());
 
         let textGeometry = new THREE.TextBufferGeometry(`${this.value}`, {
             font: myFont,
@@ -47,7 +55,6 @@ class PointLoad extends Load {
         super('point', loadCase, value);
     }
     render(position) {
-        let load = this;
         position.y += 0.5*this.value;
         let arrow = new THREE.ArrowHelper(dir, position, 0.5*this.value, 0xcc00ff/*,0.1*this.value,0.2*this.value*/);
         let textGeometry = new THREE.TextBufferGeometry(`${this.value}`, {
