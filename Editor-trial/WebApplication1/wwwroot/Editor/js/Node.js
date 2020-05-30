@@ -21,7 +21,6 @@ class Node {
             this.visual.mesh.position.set(coordX, coordY , coordZ);
         }
         this.visual.mesh.userData.node = this;
-        this.visual.mesh.position.set(coordX, coordY, coordZ);
     }
     addLoad(load, replace) {
         let currentLoad = this.data.loads.find(l => l.loadCase === load.loadCase);

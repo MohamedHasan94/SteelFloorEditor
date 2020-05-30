@@ -23,12 +23,10 @@ function generateColumns(editor, coordX, coordY, coordZ, mainNodes, section, sec
     let xNo = coordX.length, zNo = coordZ.length;
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
-    debugger
     for (let i = 0; i < xNo; i++) {
 
         for (let j = 0; j < zNo; j++) {
             let node = new Node(coordX[i], coordY, coordZ[j], 'Hinge');
-            //node.visual.mesh = createHinge(node.data.position);
             editor.addToGroup(node.visual.mesh, 'nodes');
             editor.createPickingObject(node);
             lowerNodes.push(node);
