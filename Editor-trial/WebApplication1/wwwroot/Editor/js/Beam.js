@@ -1,6 +1,6 @@
 let vector = new THREE.Vector3();
-let zVector = new THREE.Vector3(0,0,1);
-class Beam extends FrameElement{
+let zVector = new THREE.Vector3(0, 0, 1);
+class Beam extends FrameElement {
     constructor(sectionId, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode) {
         let direction = (vector.clone().subVectors(endPoint, startPoint)).normalize();
         let rotation = new THREE.Euler(0, direction.angleTo(zVector), 0);
@@ -14,15 +14,16 @@ class Beam extends FrameElement{
             lineMaterial.clone(), meshMaterial.clone(), this.startNode, this.endNode);
     }
     addLoad(load, replace) {
-        if (replace || !this.data.loads[load.loadCase])
-            this.data.loads[load.loadCase] = load;
+        let currentLoad = this.data.loads.find(l => l.loadCase === load.loadCase);
+        if (replace || !currentLoad)
+            this.data.loads.push(load);
         else
-            this.data.loads[load.loadCase].value += load.value;
+            currentLoad.value += load.value;
     }
 }
 
 //Automatically generate the floor system from user's input (Creates the nodes with the beams)
-function generateBeams(editor, coordX, coordY, coordZ, mainSectionId , secSectionId, mainSection, secSection, secSpacing) {
+function generateBeams(editor, coordX, coordY, coordZ, mainSectionId, secSectionId, mainSection, secSection, secSpacing) {
     let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [0], distribution;
     if (coordX[1] > coordZ[1]) {
         [mainBeams, nodes] = createZBeamsWithNodes(editor, coordX, coordY, coordZ, mainSection, mainSectionId); //Create main beams on z-axis (short direction)
@@ -42,8 +43,6 @@ function generateBeams(editor, coordX, coordY, coordZ, mainSectionId , secSectio
         }
         [secBeams, secNodes] = createZBeams(editor, secCoord, coordY, coordZ, secSection, coordX, nodes, mainBeams);  //Create secondary beams on z-axis (long direction)
     }
-    console.log(mainBeams)
-    console.log(secBeams)
     return [mainBeams, secBeams, nodes, secNodes];
 }
 
@@ -58,7 +57,7 @@ function createXBeams(editor, coordX, coordY, coordZ, section, coordZToCheck, no
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
 
-    let k = 0, m = 0 , a = -1;
+    let k = 0, m = 0, a = -1;
     let n = (coordZ.length - 1) / (coordZToCheck.length - 1); // Counters to relate beams and nodes
 
     for (let i = 0; i < coordZ.length; i++) {
@@ -72,7 +71,7 @@ function createXBeams(editor, coordX, coordY, coordZ, section, coordZToCheck, no
             mainBeams[(i - m)].data.innerNodes.push({ "$ref": secBeamsNodes[k].data.$id });
             k++;
         }
-        else { a++;}
+        else { a++; }
 
         for (let j = 0; j < coordX.length - 1; j++) {
             let beam;
@@ -105,7 +104,7 @@ function createZBeams(editor, coordX, coordY, coordZ, section, coordXToCheck, no
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
 
-    let k = 0, m = 0 , a = -1;
+    let k = 0, m = 0, a = -1;
     let n = (coordX.length - 1) / (coordXToCheck.length - 1);
 
 
@@ -146,7 +145,7 @@ function createZBeams(editor, coordX, coordY, coordZ, section, coordXToCheck, no
 }
 
 //Main beams on Z (Creates both beams and nodes)
-function createZBeamsWithNodes(editor, coordX, coordY, coordZ, section , mainSectionId) {
+function createZBeamsWithNodes(editor, coordX, coordY, coordZ, section, mainSectionId) {
     let beams = [];
     let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
@@ -193,13 +192,13 @@ function createXBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
 
         for (let j = 0; j < coordX.length - 1; j++) {
             nodes.push(new Node(coordX[j + 1], coordY, coordZ[i]));
-            editor.addToGroup(nodes[k].visual.mesh , 'nodes');
+            editor.addToGroup(nodes[k].visual.mesh, 'nodes');
             editor.createPickingObject(nodes[k]);
 
             let beam = new Beam(section, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
                 shape, lineMaterial.clone(), meshMaterial.clone(), nodes[k - 1], nodes[k]);
             beams.push(beam);
-            editor.addToGroup(beam.visual.mesh , 'elements');
+            editor.addToGroup(beam.visual.mesh, 'elements');
             editor.createPickingObject(beam);
             k++;
         }

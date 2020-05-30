@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "About";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>Use this area to provide additional information.</p>
+<button onclick="send()">Send</button>
+<script>
+    function send() {
+        let js = {"nodes":[
+        { "$id" : "1", "position":{"x":0,"y":0,"z":0},"loads":{}},
+        { "$id" : "2", "position":{"x":0,"y":0,"z":5},"loads":{}},
+        { "$ref" : "1"},
+        { "$id" : "4", "position":{"x":0,"y":0,"z":15},"loads":{}}],"mainBeams":[
+    {"section":"IPE 300","startPoint":{"x":0,"y":0,"z":0},"endPoint":{"x":0,"y":0,"z":5},
+    "startNode":{"$ref" : "1"},
+    "endNode":{"$ref" : "2"},"span":5,"loads":{},"innerNodes":[{"$ref" : "3"},{"$ref" : "4"}]}]
+    }
+
+        js = this.JSON.stringify(js);
+        this.console.log(js);
+
+        debugger
+
+        $.ajax({
+            url: `/Home/Read`,
+            type: "POST",
+            contentType: 'text/plain',
+            //contentType: 'application/json',
+            data: js,
+            success: function (res) {
+                debugger
+                console.log(res)
+            },
+            error: function (x, y, res) {
+                console.log(res)
+                debugger;
+            }
+
+        });
+    }
+</script>

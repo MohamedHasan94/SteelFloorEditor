@@ -4,7 +4,7 @@
     //#region  Shared variables
     let editor;
     let nodes, grids;
-    let columns, mainBeams, secondaryBeams , sections = [];
+    let columns, mainBeams, secondaryBeams, sections = [];
     let canvas;
     const pickPosition = { x: 0, y: 0 };
     let draw = false, drawingPoints = [];
@@ -15,7 +15,7 @@
         editor.init(); //Setup editor
         canvas = editor.renderer.domElement;
         document.body.appendChild(canvas); //Append the canvas to the Html body
-        
+
         $('#exampleModal').modal('show'); //Temporary data input
     }
 
@@ -39,13 +39,13 @@
         editor.addToGroup(grids.linesInZ, 'grids'); //Add z-grids to scene (as a group)
         if (!editGrids) {
             let mainNodes, secNodes, lowerNodes;
-            [mainBeams, secondaryBeams, mainNodes, secNodes] = generateBeams(editor, coordX, height, coordZ, "s2" , "s1",
+            [mainBeams, secondaryBeams, mainNodes, secNodes] = generateBeams(editor, coordX, height, coordZ, "s2", "s1",
                 'IPE 270', 'IPE 200', secSpacing); //Auto generate floor beams and nodes 
-            [columns, lowerNodes] = generateColumns(editor, coordX, 0, coordZ, mainNodes, 'IPE 360' , "s3"); //Auto generate columns
+            [columns, lowerNodes] = generateColumns(editor, coordX, 0, coordZ, mainNodes, 'IPE 360', "s3"); //Auto generate columns
             nodes = mainNodes.concat(secNodes);
             nodes = lowerNodes.concat(nodes);
         }
-        sections.push({$id : "s1",name : 'IPE 200'} , {$id : "s2", name : 'IPE 270'} , {$id : "s3", name : 'IPE 360'});
+        sections.push({ $id: "s1", name: 'IPE 200' }, { $id: "s2", name: 'IPE 270' }, { $id: "s3", name: 'IPE 360' });
     })
 
     //Turn spacings into coordinates
@@ -177,7 +177,7 @@
             case 'd':
                 draw = draw ? false : true;
                 break;
-            }
+        }
     });
 
     function getElementNodes(newStartPosition, newEndPosition, element) {
@@ -209,6 +209,7 @@
     window.dead = function () {
         let deadLoad = new LineLoad('dead', 1.5);
         editor.clearGroup('loads');
+        debugger
         secondaryBeams.forEach(b => {
             b.addLoad(deadLoad, true);
             editor.addToGroup(deadLoad.render(b), 'loads');
@@ -228,8 +229,10 @@
         let replace = $('#replace').prop('checked');;
         let load = new LineLoad('live', parseFloat($('#load').val()));
         if (editor.picker.selectedObject.userData.element instanceof Beam) {
+            debugger
             let beam = editor.picker.selectedObject.userData.element;
             beam.addLoad(load, replace);
+            console.log(beam.data);
             editor.clearGroup('loads');
             editor.addToGroup(beam.data.loads[load.loadCase].render(beam), 'loads')
         }
@@ -274,24 +277,33 @@
     }
 
     window.changeSection = function () {
-        if (editor.picker.selectedObject.userData.element)
-            editor.picker.selectedObject.userData.element.changeSection($('#section').val());
+        if (editor.picker.selectedObject.userData.element) {
+            let newSection = $('#section').val();
+            let existingSection = sections.find(s => s.name == newSection);
+            if (!existingSection) {
+                existingSection = { $id: `s${sections.length}`, name: newSection };
+                sections.push(existingSection);
+            }
+            editor.picker.selectedObject.userData.element.changeSection(newSection);
+        }
         else
             this.alert('Please select an element first')
     }
 
-    window.addNodeToBeam = function (){
+    window.addNodeToBeam = function () {
         debugger
-        if(editor.picker.selectedObject && editor.picker.selectedObject.userData.element instanceof Beam){
-            let distance = parseFloat($('#nodeToBeam').val());
+        if (editor.picker.selectedObject && editor.picker.selectedObject.userData.element instanceof Beam) {
             let element = editor.picker.selectedObject.userData.element;
-            let displacement = element.visual.direction.clone().multiplyScalar(distance);
-            let nodePosition = element.data.startPoint.clone().add(displacement);
-            let node = new Node(nodePosition.x, nodePosition.y, nodePosition.z);
-            element.data.innerNodes.push({"$ref": node.data.$id});
-            nodes.push(node);
-            editor.addToGroup(node.visual.mesh , 'nodes');
-            editor.createPickingObject(node);
+            let distances = $('#nodeToBeam').val().split(',');
+            for (var i = 0; i < distances.length; i++) {
+                let displacement = element.visual.direction.clone().multiplyScalar(parseFloat(distances[i]));
+                let nodePosition = element.data.startPoint.clone().add(displacement);
+                let node = new Node(nodePosition.x, nodePosition.y, nodePosition.z);
+                element.data.innerNodes.push({ "$ref": node.data.$id });
+                nodes.push(node);
+                editor.addToGroup(node.visual.mesh, 'nodes');
+                editor.createPickingObject(node);
+            }
         }
     }
 
@@ -329,18 +341,23 @@
     }
 
     window.send = function () {
-        let js = { nodes: [], /*secondaryBeams: [],*/ sections, mainBeams: [] };
+        let js = { nodes: [], sections : [], secondaryBeams: [], sections, mainBeams: [], columns : []};
         for (var i = 0; i < nodes.length; i++) {
             js.nodes.push(nodes[i].data);
         }
 
         js.sections = sections;
-        // for (var i = 0; i < secondaryBeams.length; i++) {
-        //     js.secondaryBeams.push(secondaryBeams[i].data);
-        // }
+
+         for (var i = 0; i < secondaryBeams.length; i++) {
+             js.secondaryBeams.push(secondaryBeams[i].data);
+         }
 
         for (var i = 0; i < mainBeams.length; i++) {
             js.mainBeams.push(mainBeams[i].data);
+        }
+
+        for (var i = 0; i < columns.length; i++) {
+            js.columns.push(columns[i].data);
         }
 
         js = this.JSON.stringify(js);
@@ -353,22 +370,23 @@
             contentType: 'application/json',
             data: js,
             success: function (res) {
-                debugger
                 console.log(res)
             },
             error: function (x, y, res) {
                 console.log(res)
-                debugger;
             }
 
         });
     }
 
     window.save = function () {
-        let js = { nodes: [], secondaryBeams: [], mainBeams: [] };
+        let js = { nodes: [], sections : [], secondaryBeams: [], mainBeams: [], columns : [] };
         for (var i = 0; i < nodes.length; i++) {
             js.nodes.push(nodes[i].data);
         }
+
+        js.sections = sections;
+
 
         for (var i = 0; i < secondaryBeams.length; i++) {
             js.secondaryBeams.push(secondaryBeams[i].data);
@@ -378,6 +396,9 @@
             js.mainBeams.push(mainBeams[i].data);
         }
 
+        for (var i = 0; i < columns.length; i++) {
+            js.columns.push(columns[i].data);
+        }
         js = this.JSON.stringify(js);
         this.console.log(js);
 

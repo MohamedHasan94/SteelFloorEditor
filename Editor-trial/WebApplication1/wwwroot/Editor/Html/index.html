@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../Bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../Css/style.css" />
+  <title>Editor</title>
+</head>
+
+<body>
+    <button onclick="editGrids()">Edit Grids</button>
+    x<input type="text" id="x" value="0">
+    y<input type="text" id="y" value="0">
+    z<input type="text" id="z" value="0">
+    <button onclick="toggle()">Toggle View</button>
+    <button onclick="dead()">Add Dead Load</button>
+    <button onclick="live()">Add Live Load</button>
+
+    <input type="text" id="load" placeholder="load value">
+    <input type="checkbox" id="replace">
+    <button onclick="addLoad()">Add Load</button>
+    <button onclick="hideLoads()">Hide Loads</button>
+
+    <select id="loadCase">
+        <option value="dead">Dead</option>
+        <option value="live">Live</option>
+    </select>
+    <button onclick="showLoads()">Show Loads</button>
+
+    <input type="text" id="pointLoad" placeholder="load value">
+    <button onclick="addPointLoad()">Add Point Load</button>
+
+    <input type="text" id="section">
+    <button onclick="changeSection()">change section</button>
+
+    <input type="text" id="nodeXCoord">
+    <input type="text" id="nodeYCoord">
+    <input type="text" id="nodeZCoord">
+    <button onclick="createNode()"></button>
+
+    <button onclick="send()">Send</button>
+    <button onclick="save()">Save</button>
+    <input type="text" id="beamSection" disabled>
+    <input type="text" id="beamStart" disabled>
+    <input type="text" id="beamEnd" disabled>
+    <input type="text" id="beamDead" disabled>
+    <input type="text" id="beamLive" disabled>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Grids Spacing</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="spaceX">Spacing in X-direction</label>
+                        <input type="text" name="" id="spaceX" class="form-control" value="6*6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="spaceZ">Spacing in Z-direction</label>
+                        <input type="text" name="" id="spaceZ" class="form-control" value="6*5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="secSpace">Spacing between seccondary beams</label>
+                        <input type="text" name="" id="secSpace" class="form-control" value="2.5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="secSpace">Dead Load</label>
+                        <input type="text" name="" id="dead" class="form-control" value="1.5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="secSpace">Live Load</label>
+                        <input type="text" name="" id="live" class="form-control" value="2.5" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="createGrids">Create Grids</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/dependencies/three.js"></script>
+    <script src="../js/dependencies/OrbitControls.js"></script>
+    <script src="../Bootstrap/jquery-3.0.0.min.js"></script>
+    <script src="../Bootstrap/bootstrap.min.js"></script>
+    <script src="../js/Picker.js"></script>
+    <script src="../js/Load.js"></script>
+    <script src="../js/Beam.js"></script>
+    <script src="../js/Editor.js"></script>
+    <script src="../js/Grid.js"></script>
+    <script src="../js/Node.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

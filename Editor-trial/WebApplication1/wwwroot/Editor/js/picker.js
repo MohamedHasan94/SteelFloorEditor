@@ -9,7 +9,7 @@ class GPUPickHelper {
         this.emissiveFlash = 0xcc5511;
     }
 
-    getObject(cssPosition, renderer, pickingScene, camera , idToObject) {
+    getObject(cssPosition, renderer, pickingScene, camera, idToObject) {
         const { pickingTexture, pixelBuffer } = this;
         // set the view offset to represent just the (9*9 pixels) area around the mouse
         const pixelRatio = renderer.getPixelRatio();
@@ -49,13 +49,13 @@ class GPUPickHelper {
         return null;
     }
 
-    select(cssPosition, renderer, pickingScene, camera , idToObject) { //On mouse click
+    select(cssPosition, renderer, pickingScene, camera, idToObject) { //On mouse click
         // restore the color if there is a picked object
         if (this.selectedObject) {
             this.selectedObject.material.color.setHex(this.selectedObject.material.color.getHex() - this.emissiveFlash);
         }
 
-        this.selectedObject = this.getObject(cssPosition, renderer, pickingScene, camera , idToObject);
+        this.selectedObject = this.getObject(cssPosition, renderer, pickingScene, camera, idToObject);
         if (this.selectedObject) {
             this.selectedObject.material.color.setHex(this.selectedObject.material.color.getHex() + this.emissiveFlash);
             if (this.selectedObject.userData.element) {
@@ -73,13 +73,13 @@ class GPUPickHelper {
         this.selectedObject = null;
     }
 
-    pick(cssPosition, renderer, pickingScene, camera , idToObject) { //On mouse hover
+    pick(cssPosition, renderer, pickingScene, camera, idToObject) { //On mouse hover
         // restore the color if there is a picked object
         if (this.pickedObject) {
             this.pickedObject.material.color.setHex(this.pickedObject.material.color.getHex() - this.emissiveFlash);
         }
 
-        this.pickedObject = this.getObject(cssPosition, renderer, pickingScene, camera , idToObject);
+        this.pickedObject = this.getObject(cssPosition, renderer, pickingScene, camera, idToObject);
         if (this.pickedObject) {
             this.pickedObject.material.color.setHex(this.pickedObject.material.color.getHex() + this.emissiveFlash);
         }
