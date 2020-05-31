@@ -85,11 +85,11 @@ class FrameElement {
         this.visual.mesh.position.add(displacement);
     }
     changeSection(section) {
-        let dimensions = new SectionDimensions(parseInt(section.split(' ')[1]) / 1000);
+        let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
         let shape = createShape(dimensions);
         this.visual.extruded.geometry.dispose();
-        extrudeSettings.depth = this.data.span;
+        extrudeSettings.depth = this.data.span ?? this.data.height;
         this.visual.extruded.geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-        this.data.section = section;
+        this.data.section = section.$id;
     }
 }

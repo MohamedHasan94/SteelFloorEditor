@@ -23,26 +23,31 @@ class Node {
         this.visual.mesh.userData.node = this;
     }
     addLoad(load, replace) {
-        let currentLoad = this.data.loads.find(l => l.loadCase === load.loadCase);
-        if (replace || !currentLoad)
+        let index = this.data.loads.findIndex(l => l.loadCase === load.loadCase);
+        if (index < 0) { //has no load of the same case(pattern)
             this.data.loads.push(load);
-        else
-            currentLoad.value += load.value;
+            index = this.data.loads.length - 1;
+        }
+        else if (replace) //has a load of the same case(pattern) , Replace it
+            this.data.loads[index] = load;
+        else              //has a load of the same case(pattern) , Add to it
+            this.data.loads[index].value += load.value;
+        return index;
     }
 }
 
 
-// function createNodes(scene, pickingScene, coordX, coordZ) {
-//     let nodeGroup = new THREE.Group();
-//     let nodes = [];
-//     let points = getPoints(coordX, coordZ);
-//     for (let i = 0; i < points.length; i++) {
-//         nodes.push(new Node(points[i], ++id));
-//         nodeGroup.add(nodes[i].mesh);
-//         window.idToObject[id] = nodes[i].mesh;
-//         pickingScene.add(new PickingNode(nodes[i], id).mesh)
-//     }
-//     nodes.nodeGroup = nodeGroup;
-//     scene.add(nodeGroup);
-//     return nodes;
-// }
+function createNodes(editor, coordX, coordZ) {
+    let nodes = [];
+    let k = 0;
+    for (let i = 0; i < coordX.length; i++) {
+        for (let j = 0; j < coordZ.length; j++) {
+
+            nodes.push(new Node(coordX[i], 0, coordZ[j]));
+            editor.addToGroup(nodes[k].visual.mesh, 'nodes');
+            editor.createPickingObject(nodes[k]);
+            k++;
+        }
+    }
+    return nodes;
+}

@@ -135,15 +135,15 @@ class Editor {
     select(pickPosition) {
         this.picker.select(pickPosition, this.renderer, this.pickingScene, this.camera, this.idToObject);
     }
-    clearGroup(group){
+    clearGroup(group) {
         group = this.scene.userData[group];
         let length = group.children.length;
         for (let i = 0; i < length; i++) {
-            if(!group.children[i].children){ //if the object has its own children
-                group.children[i].geometry.dispose();                
-                group.children[i].material.dispose();                
-            }   
-            else{
+            if (!group.children[i].children) { //if the object has its own children
+                group.children[i].geometry.dispose();
+                group.children[i].material.dispose();
+            }
+            else {
                 group.children[i].children.forEach(c => {
                     c.material.dispose();
                     c.geometry.dispose();
