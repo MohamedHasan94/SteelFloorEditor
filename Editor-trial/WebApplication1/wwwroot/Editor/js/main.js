@@ -6,7 +6,6 @@
     let nodes, grids;
     let columns, mainBeams, secondaryBeams, sections = [];
     let canvas;
-    const pickPosition = { x: 0, y: 0 };
     let draw = false, drawingPoints = [];
     let sectionId = 0;
     //#endregion
@@ -15,22 +14,12 @@
         editor = new Editor(); //Instantiate editor
         editor.init(); //Setup editor
         canvas = editor.renderer.domElement;
-        document.body.appendChild(canvas); //Append the canvas to the Html body
+        //document.body.appendChild(canvas); //Append the canvas to the Html body
 
         $('#exampleModal').modal('show'); //Temporary data input
     }
 
     $(document).ready();
-
-    // var autoModeDataDiv = document.getElementById("autoModeData");
-    // window.showHideAutoModeData= function() {
-    //     if (document.getElementById("autoMode").checked) {
-    //         autoModeDataDiv.style.display='block';
-    //         console.log(1);
-    //     }else{
-    //         autoModeDataDiv.style.display='none';
-    //     }                      
-    // }
 
     $("#manMode").click(function () { //Hide Auto mode data if Manual mode selected
         $("#autoModeData").fadeOut();
@@ -40,39 +29,33 @@
         $("#autoModeData").fadeIn();
     });
 
-
     $('#createGrids').click(function () {
         $('#exampleModal').modal('hide');
-        let noInX, spaceX, noInZ, spaceZ, secSpacing, coordX, coordZ, height;
-        [noInX, spaceX] = $('#spaceX').val().split('*').map(s => parseFloat(s)); //No. and spacing between grids in x-direction
-        [noInZ, spaceZ] = $('#spaceZ').val().split('*').map(s => parseFloat(s)); //No. and spacing between grids in Z-direction
+        let secSpacing, coordX, coordZ, height;
+        coordX = getCoords($('#spaceX').val()); //Get X-coordinates from X-spacings
+        coordZ = getCoords($('#spaceZ').val()); //Get Z-coordinates from Z-spacings
         height = parseFloat($('#height').val()); //Storey height
-        [coordX, coordZ] = getPoints(noInX, spaceX, noInZ, spaceZ); //Get coordinates from spacings
-        secSpacing = parseFloat($('#secSpace').val()); //Spacing between secondary beams
-        //let editGrids = false;
-        // if (grids) { //Check if it is editing or creating
-        //     scene.remove(nodes);
-        //     scene.remove(grids.linesInX);
-        //     scene.remove(grids.linesInZ);
-        //     editGrids = true;
-        // }
-
+        secSpacing = $('#secSpace').val().split(' ').map(s => parseFloat(s)); //Spacing between secondary beams
+        //secSpacing = parseFloat($('#secSpace').val()); //Spacing between secondary beams
         grids = new Grid(coordX, coordZ, coordX.length, coordZ.length, 3);
         editor.addToGroup(grids.linesInX, 'grids'); //Add x-grids to scene (as a group)
         editor.addToGroup(grids.linesInZ, 'grids'); //Add z-grids to scene (as a group)
 
-        //var xAxis = document.getElementById("xOrient"); //??!!
         if (!document.getElementById("autoMode").checked) {
             nodes = createNodes(editor, coordX, coordZ);
         }
         else {
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
             if (document.getElementById("xOrient").checked) {
+                //let secCoords = getSecCoords(coordX, secSpacing);
+
                 [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsX(editor, coordX, height, coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in X
                 [columns, lowerNodes] = generateColumnsZ(editor, coordX, 0, coordZ, mainNodes, sections[2]); //Auto generate columns
             }
             else {
+                //let secCoords = getSecCoords(coordZ, secSpacing);
+
                 [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsZ(editor, coordX, height, coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in Z
 
@@ -82,49 +65,34 @@
             nodes = mainNodes.concat(secNodes);
             nodes = lowerNodes.concat(nodes);
         }
-
-
     })
 
     //Turn spacings into coordinates
-    function getPoints(noInX, spaceX, noInZ, spaceZ) {
-        let coordX = [], coordZ = [], coord = 0;
-        for (let i = 0; i < noInX + 1; i++) {
-            coordX[i] = coord;
-            coord += spaceX;
+    function getCoords(input) {
+        let coord = [], space, number, sum = 0;
+        if (input.includes('*')) { //Equal spacing
+            [number, space] = input.split('*').map(s => parseFloat(s));
         }
-        coord = 0;
-        for (let i = 0; i < noInZ + 1; i++) {
-            coordZ[i] = coord;
-            coord += spaceZ;
+        else { //Variable spacing
+            space = input.split(' ').map(s => parseFloat(s));
+            number = space.length;
         }
-        return [coordX, coordZ];
+        number++;
+        for (var i = 0; i < number; i++) {
+            coord[i] = sum;
+            sum += space[i] ?? space;
+        }
+        return coord;
     }
-
-    //Edit the grids and nodes after creation
-    // window.editGrids = function () {
-    //     $('#spaceX').val(coordX.join());
-    //     $('#spaceZ').val(coordZ.join());
-    //     $('#exampleModal').modal('show');
-    // }
-
-    function setPickPosition(event) { //get the mouse position relative to the canvas (not the screen)
-        const rect = canvas.getBoundingClientRect();
-        //GPUPicker reads the pixels from the top left corner of the canvas
-        pickPosition.x = (event.clientX - rect.left) * canvas.width / rect.width;
-        pickPosition.y = (event.clientY - rect.top) * canvas.height / rect.height;
-    }
-
+        
     init();
 
-    canvas.addEventListener('mousemove', function () {
-        setPickPosition(event);
-        editor.pick(pickPosition);
+    canvas.addEventListener('mousemove', function (event) {
+        editor.pick(event);
     });
 
     canvas.addEventListener('click', function (event) {
-        setPickPosition(event);
-        editor.select(pickPosition);
+        editor.select(event);
         if (draw) {
             if (editor.picker.selectedObject && editor.picker.selectedObject.geometry instanceof THREE.SphereBufferGeometry) {
                 drawingPoints.push(editor.picker.selectedObject.userData.node);
@@ -133,9 +101,8 @@
                     let element;
                     let section = $('#drawSection').val();
                     let sectionObject = sections.find(s => s.name === section); //Check if section already exists
-                    if(!sectionObject)
-                    { //If not existing , create one
-                        sectionObject = { $id : `s${++sectionId}` , name : section};
+                    if (!sectionObject) { //If not existing , create one
+                        sectionObject = { $id: `s${++sectionId}`, name: section };
                         sections.push(sectionObject);
                     }
                     if (drawingPoints[0].data.position.x == drawingPoints[1].data.position.x &&
@@ -157,6 +124,21 @@
         }
     });
 
+    //Try Area selection
+    /*let initialPosition;
+    canvas.onmousedown = function (event) {
+        initialPosition = editor.setPickPosition(event);
+        console.log(initialPosition);
+    }
+
+    let finalPosition;
+    canvas.onmouseup = function (event) {
+        finalPosition = editor.setPickPosition(event);
+        console.log(finalPosition);
+        editor.selectByArea(initialPosition, finalPosition)
+    }*/
+
+
     window.addEventListener('keyup', function (event) {
         switch (event.key) {
             case 'Delete':
@@ -176,7 +158,7 @@
                 break;
         }
     });
-
+    
     window.deleteElement = function () {
 
         if (editor.picker.selectedObject) {
@@ -276,24 +258,6 @@
         }
     }
 
-    /*window.dead = function () {
-        let deadLoad = new LineLoad('dead', 1.5);
-        editor.clearGroup('loads');
-        secondaryBeams.forEach(b => {
-            b.addLoad(deadLoad, true);
-            editor.addToGroup(deadLoad.render(b), 'loads');
-        });
-    }
-
-    window.live = function () {
-        let liveLoad = new LineLoad('live', 2);
-        editor.clearGroup('loads');
-        secondaryBeams.forEach(b => {
-            b.addLoad(liveLoad, true);
-            editor.addToGroup(liveLoad.render(b), 'loads');
-        });
-    }*/
-
     window.addLineLoad = function () { //Adds a LineLoad to the selected beam
         if (editor.picker.selectedObject.userData.element instanceof Beam) {
             let replace = $('#replaceLineLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
@@ -381,10 +345,9 @@
     }
 
     window.createNode = function () {
-        let coordX = parseFloat($('#nodeXCoord').val());
-        let coordY = parseFloat($('#nodeYCoord').val());
-        let coordZ = parseFloat($('#nodeZCoord').val());
-        let node = new Node(coordX, coordY, coordZ);
+        let node = new Node(parseFloat($('#nodeXCoord').val()),
+            parseFloat($('#nodeYCoord').val()), parseFloat($('#nodeZCoord').val()));
+
         let beam = getIntersectedBeam(node.data.position.clone()); //Beam mesh
         if (beam && beam.userData.element instanceof Beam) {
             beam = beam.userData.element; //Beam object
@@ -401,9 +364,8 @@
         editor.createPickingObject(node);
     }
 
-    function getIntersectedBeam(position) {
+    function getIntersectedBeam(position) { //Checks if a beam exists at the node position 
         let widthHalf = window.innerWidth / 2, heightHalf = window.innerHeight / 2;
-
         position.project(editor.camera); //Project the 3D world position on the screen
         //The resulting position is between[-1,1] WebGl coordinates with the origin at the screen center
         //Switch position to screen position with the origin at the top left corner
@@ -414,76 +376,58 @@
     }
 
     window.startDrawMode = () => draw = true;
-    window.endDrawMode = () => draw = false;
+    window.endDrawMode = () => {
+        draw = false;
+        drawingPoints = [];
+    }
 
-
-    window.send = function () { //Send data to server
-        let js = { nodes: [], sections: [], secondaryBeams: [], sections, mainBeams: [], columns: [] };
+    function createModel() { //Serialize model components to JSON
+        let model = { nodes: [], sections: [], secondaryBeams: [], sections, mainBeams: [], columns: [] };
         for (var i = 0; i < nodes.length; i++) {
-            js.nodes.push(nodes[i].data);
+            model.nodes.push(nodes[i].data);
         }
 
-        js.sections = sections;
+        model.sections = sections;
 
         for (var i = 0; i < secondaryBeams.length; i++) {
-            js.secondaryBeams.push(secondaryBeams[i].data);
+            model.secondaryBeams.push(secondaryBeams[i].data);
         }
 
         for (var i = 0; i < mainBeams.length; i++) {
-            js.mainBeams.push(mainBeams[i].data);
+            model.mainBeams.push(mainBeams[i].data);
         }
 
         for (var i = 0; i < columns.length; i++) {
-            js.columns.push(columns[i].data);
+            model.columns.push(columns[i].data);
         }
+        model = JSON.stringify(model);
+        console.log(model)
+        return model;
+    }
 
-        js = this.JSON.stringify(js);
-        this.console.log(js);
-
+    window.send = function () { //Send data to server        
         debugger
         $.ajax({
             url: `/Home/Solve`,
             type: "POST",
             contentType: 'application/json',
-            data: js,
+            data: createModel(),
             success: function (res) {
                 console.log(res)
             },
             error: function (x, y, res) {
                 console.log(res)
             }
-
         });
     }
 
     window.save = function () { // Save data on the server
-        let js = { nodes: [], sections: [], secondaryBeams: [], mainBeams: [], columns: [] };
-        for (var i = 0; i < nodes.length; i++) {
-            js.nodes.push(nodes[i].data);
-        }
-
-        js.sections = sections;
-
-
-        for (var i = 0; i < secondaryBeams.length; i++) {
-            js.secondaryBeams.push(secondaryBeams[i].data);
-        }
-
-        for (var i = 0; i < mainBeams.length; i++) {
-            js.mainBeams.push(mainBeams[i].data);
-        }
-
-        for (var i = 0; i < columns.length; i++) {
-            js.columns.push(columns[i].data);
-        }
-        js = this.JSON.stringify(js);
         debugger
-        this.console.log(js);
         $.ajax({
             url: `/Home/Read`,
             type: "POST",
             contentType: 'text/plain',
-            data: js,
+            data: createModel(),
             success: function (res) {
                 console.log(res)
             },
@@ -494,32 +438,10 @@
     }
 
     window.saveLocally = function () {
-        let js = { nodes: [], sections: [], secondaryBeams: [], mainBeams: [], columns: [] };
-        for (var i = 0; i < nodes.length; i++) {
-            js.nodes.push(nodes[i].data);
-        }
+        this.localStorage.setItem('Model', createModel()); //Save data to localStorage ??!! Option #1
 
-        js.sections = sections;
-
-
-        for (var i = 0; i < secondaryBeams.length; i++) {
-            js.secondaryBeams.push(secondaryBeams[i].data);
-        }
-
-        for (var i = 0; i < mainBeams.length; i++) {
-            js.mainBeams.push(mainBeams[i].data);
-        }
-
-        for (var i = 0; i < columns.length; i++) {
-            js.columns.push(columns[i].data);
-        }
-        js = this.JSON.stringify(js);
-        this.localStorage.setItem('Model', js); //Save data to localStorage ??!! Option #1
-
-
-        /////
-        //Trial : Save data on client machine if no internet connection Option #2
-        let text = new Blob([js], { type: 'text/json' }); //Blob : An object that represents a file
+        //Save data on client machine if no internet connection Option #2
+        let text = new Blob([createModel()], { type: 'text/json' }); //Blob : An object that represents a file
 
         textFile = window.URL.createObjectURL(text); // The URL to that object
 

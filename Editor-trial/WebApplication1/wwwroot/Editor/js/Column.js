@@ -38,22 +38,6 @@ function generateColumnsX(editor, coordX, coordY, coordZ, mainNodes, section, se
         }
 
     }
-
-    // for (let i = 0; i < zNo; i++) {
-
-    //     for (let j = 0; j < xNo; j++) {
-    //         let node = new Node(coordX[j] , coordY , coordZ[i] , 'Hinge');
-    //         editor.addToGroup(node.visual.mesh , 'nodes');
-    //         editor.createPickingObject(node);
-    //         lowerNodes.push(node);
-    //         let column = new Column(section, lowerNodes[i*xNo+j].data.position.clone(), mainNodes[i*xNo + j].data.position.clone(),
-    //             shape, lineMaterial.clone(), meshMaterial.clone(), lowerNodes[i*xNo+j] , mainNodes[i*xNo + j]);
-    //         columns.push(column);            
-    //         editor.addToGroup(column.visual.mesh, 'elements');
-    //         editor.createPickingObject(column);
-    //     }
-
-    // }
     return [columns, lowerNodes];
 }
 
@@ -79,16 +63,6 @@ function generateColumnsZ(editor, coordX, coordY, coordZ, mainNodes, section, se
     }
     return [columns, lowerNodes];
 }
-
-
-// let hingeMaterial = new THREE.LineBasicMaterial({ color: 0x6633ff});
-//let hingeMaterial = new THREE.MeshPhongMaterial({ color: 0x6633ff});
-//let hingeGeometry = new THREE.ConeBufferGeometry(0.3, 0.3, 4);
-//function createHinge(position) {
-//    let hinge = new THREE.Mesh(hingeGeometry, hingeMaterial.clone());
-//    hinge.position.set(position.x, -0.15 , position.z);
-//    return hinge
-//}
 
 function drawColumnByTwoPoints(section, startNode, endNode) {
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);

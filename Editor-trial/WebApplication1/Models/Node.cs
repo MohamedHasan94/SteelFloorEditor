@@ -33,13 +33,7 @@ namespace WebApplication1.Models
 
         public List<Load> Loads { get; set; }
     }
-
-    public class Loads
-    {
-        public Load Dead { get; set; }
-        public Load Live { get; set; }
-    }
-
+    
     public class Load
     {
         public string Type { get; set; }

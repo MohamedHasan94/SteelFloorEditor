@@ -15,9 +15,10 @@ class Editor {
         this.picker = new GPUPickHelper();
         this.pickingScene.background = new THREE.Color(0);
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('canvas') });
         this.id = 0;
         this.idToObject = [];
+        this.canvas;
     }
     init() {
         //#region Creating camera
@@ -27,9 +28,9 @@ class Editor {
 
         //#region Renderer
         this.renderer.setClearColor(0xdddddd); //setting color of canvas
+        this.canvas = this.renderer.domElement;
         this.renderer.setSize(window.innerWidth, window.innerHeight); //setting width and height of canvas(canvas.width, canvas.height)
-        //this.canvas = this.renderer.domElement;
-        // document.body.appendChild(this.canvas); //append canvas tag to html
+        //document.body.appendChild(this.canvas); //append canvas tag to html
         //#endregion
 
         //#region Controls
@@ -112,28 +113,23 @@ class Editor {
 
             visual.unusedMesh = visual.temp;
         }
-
-        /*let columns = this.scene.userData.columns;
-        length = columns.children.length;
-        visual;
-        for (let i = 0; i < length; i++) {
-            visual = columns.children[i].userData.element.visual;
-            visual.temp = columns.children[i];
-
-            visual.unusedMesh.position.copy(columns.children[i].position)
-            visual.unusedMesh.rotation.copy(columns.children[i].rotation)
-
-            columns.children[i] = visual.unusedMesh;
-            visual.mesh = columns.children[i];
-
-            visual.unusedMesh = visual.temp;
-        }*/
     }
-    pick(pickPosition) {
-        this.picker.pick(pickPosition, this.renderer, this.pickingScene, this.camera, this.idToObject);
+    setPickPosition(event) { //get the mouse position relative to the canvas (not the screen)
+        const rect = this.canvas.getBoundingClientRect();
+        //GPUPicker reads the pixels from the top left corner of the canvas
+        return {
+            x: (event.clientX - rect.left) * this.canvas.width / rect.width,
+            y: (event.clientY - rect.top) * this.canvas.height / rect.height
+        };
     }
-    select(pickPosition) {
-        this.picker.select(pickPosition, this.renderer, this.pickingScene, this.camera, this.idToObject);
+    pick(event) {
+        this.picker.pick(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera, this.idToObject);
+    }
+    select(event) {
+        this.picker.select(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera, this.idToObject);
+    }
+    selectByArea(initialPosition, finalPosition) {
+        this.picker.getObjects(initialPosition, finalPosition, this.renderer, this.pickingScene, this.camera, this.idToObject)
     }
     clearGroup(group) {
         group = this.scene.userData[group];

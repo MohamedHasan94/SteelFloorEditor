@@ -15,6 +15,7 @@
     <title>Editor</title>
 </head>
 <body>
+    <canvas id="canvas" style="position:absolute"></canvas>
     <div class="btn" id="sidebarBtn">
         <span class="fas fa-bars"></span>
     </div>
@@ -30,27 +31,27 @@
                 </a>
                 <ul class="feat-show">
                     <!-- <li>
-                        <a href="#" onclick="editGrids()">
-                            Grids
-                            <table class="table table-borderless table-dark">
-                                <tbody>
-                                    <tr>
-                                        <th>X</th>
-                                        <td><input type="text" id="x" value="0" size="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Y</th>
-                                        <td><input type="text" id="y" value="0" size="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Z</th>
-                                        <td><input type="text" id="z" value="0" size="5"></td>
-                                    </tr>
-                                <tbody>
-                            </table>
+        <a href="#" onclick="editGrids()">
+            Grids
+            <table class="table table-borderless table-dark">
+                <tbody>
+                    <tr>
+                        <th>X</th>
+                        <td><input type="text" id="x" value="0" size="5"></td>
+                    </tr>
+                    <tr>
+                        <th>Y</th>
+                        <td><input type="text" id="y" value="0" size="5"></td>
+                    </tr>
+                    <tr>
+                        <th>Z</th>
+                        <td><input type="text" id="z" value="0" size="5"></td>
+                    </tr>
+                <tbody>
+            </table>
 
-                        </a>
-                    </li>-->
+        </a>
+    </li>-->
                     <li>
                         <a href="#" onclick="changeSection()">
                             <!-- changeSection handles both beams & columns-->
@@ -80,19 +81,12 @@
                         <input type="text" id="Replication" size="5" placeholder="No. of copies">
 
                     </li>
-
-                    <!-- <li>
-                        <a href="#" onclick="">
-                            column Section
-                            <input type="text" id="colSection" size="5">
+                    <li>
+                        <a href="#" onclick="toggle()">
+                            Toggle View
                         </a>
                     </li>
-                    <li> -->
-                    <a href="#" onclick="toggle()">
-                        Toggle View
-                    </a>
-            </li>
-        </ul>
+                </ul>
         </li>
         <li>
             <a href="#" class="serv-btn">
@@ -268,12 +262,13 @@
         </ul>
     </nav>
 
-
-    <input type="text" id="beamSection" disabled>
-    <input type="text" id="beamStart" disabled>
-    <input type="text" id="beamEnd" disabled>
-    <input type="text" id="beamDead" disabled>
-    <input type="text" id="beamLive" disabled>
+    <div style="position:absolute;top:20px;right:20px">
+        <input type="text" id="beamSection" disabled >
+        <input type="text" id="beamStart" disabled>
+        <input type="text" id="beamEnd" disabled  >
+        <input type="text" id="beamDead" disabled >
+        <input type="text" id="beamLive" disabled >
+    </div>
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
          aria-hidden="true">

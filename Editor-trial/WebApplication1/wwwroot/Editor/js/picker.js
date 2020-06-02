@@ -48,6 +48,58 @@ class GPUPickHelper {
 
         return null;
     }
+    //Trial
+    getObjects(initialPosition, finalPosition, renderer, pickingScene, camera, idToObject) {
+        let rectWidth = finalPosition.x - initialPosition.x,
+            rectHeight = finalPosition.y - initialPosition.y;
+        debugger
+        let pickingTexture = new THREE.WebGLRenderTarget(rectWidth, rectHeight);
+        let pixelsBuffer = new Uint8Array(4 * rectWidth * rectHeight);
+        // set the view offset to represent just the (9*9 pixels) area around the mouse
+        const pixelRatio = renderer.getPixelRatio();
+        //move camera to the required area
+        camera.setViewOffset(
+            renderer.getContext().drawingBufferWidth,   // full width
+            renderer.getContext().drawingBufferHeight,  // full top
+            initialPosition.x * pixelRatio | 0,       // rect x
+            initialPosition.y * pixelRatio | 0,       // rect y
+            rectWidth,                                          // rect width
+            rectHeight,                                          // rect height
+        );
+
+        // render the scene
+        renderer.setRenderTarget(pickingTexture);
+        renderer.render(pickingScene, camera);
+        //Reset the settings of renderer and camera
+        renderer.setRenderTarget(null);
+        camera.clearViewOffset();
+
+        //read the pixels colors
+        renderer.readRenderTargetPixels(
+            pickingTexture,
+            0,   // x-offset
+            0,   // y-offset
+            rectWidth,       // width                                   
+            rectHeight,      // height
+            /*9,   //width
+            9,   // height*/
+            pixelsBuffer);
+        let ids = new Set();
+        for (let i = 2; i < pixelsBuffer.length; i += 4) {
+            id =(pixelsBuffer[i] | pixelsBuffer[i - 1] << 8); //Combine Blue and Green Components
+            let object = idToObject[id] 
+            if (object && object.userData['node'])
+                objects.push(object)
+
+            if (pixelsBuffer[i]) { // Check if the Blue component has a value
+                ids.add(pixelsBuffer[i] | pixelsBuffer[i - 1] << 8); //Combine Blue and Green Components
+                //return idToObject[id].mesh; //Only the first colored pixel is needed
+            }
+        }
+        debugger
+        console.log(ids);
+        return null;
+    }
 
     select(cssPosition, renderer, pickingScene, camera, idToObject) { //On mouse click
         // restore the color if there is a picked object
