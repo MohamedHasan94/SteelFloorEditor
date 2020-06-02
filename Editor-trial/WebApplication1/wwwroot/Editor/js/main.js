@@ -37,9 +37,23 @@
         height = parseFloat($('#height').val()); //Storey height
         secSpacing = $('#secSpace').val().split(' ').map(s => parseFloat(s)); //Spacing between secondary beams
         //secSpacing = parseFloat($('#secSpace').val()); //Spacing between secondary beams
+
+        stories = parseFloat($('#stories').val()); //Stories no. 
+        coordY = getElevation(stories, height); //cummulative elevation 
+
         grids = new Grid(coordX, coordZ, coordX.length, coordZ.length, 3);
         editor.addToGroup(grids.linesInX, 'grids'); //Add x-grids to scene (as a group)
         editor.addToGroup(grids.linesInZ, 'grids'); //Add z-grids to scene (as a group)
+
+        //each element in the following arrays is the collection of the structural component with respect to 
+        // which floor it is in.
+        var mainBeamsTotal = new Array(coordY.length - 1);
+        var secBeamsTotal = new Array(coordY.length - 1);
+        var columnsTotal = new Array(coordY.length - 1);
+        var mainNodesTotal = new Array(coordY.length - 1);
+        var secNodesTotal = new Array(coordY.length - 1);
+        var lowerNodesTotal = new Array(coordY.length - 1);
+
 
         if (!document.getElementById("autoMode").checked) {
             nodes = createNodes(editor, coordX, coordZ);
@@ -48,22 +62,40 @@
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
             if (document.getElementById("xOrient").checked) {
                 //let secCoords = getSecCoords(coordX, secSpacing);
+                for (let i = 1; i < coordY.length; i++) {
 
-                [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsX(editor, coordX, height, coordZ,
+                    [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsX(editor, coordX, coordY[i], coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in X
                 [columns, lowerNodes] = generateColumnsZ(editor, coordX, 0, coordZ, mainNodes, sections[2]); //Auto generate columns
+
+                mainBeamsTotal[i - 1] = mainBeams;
+                secBeamsTotal[i - 1] = secondaryBeams;
+                columnsTotal[i - 1] = columns;
+                mainNodesTotal[i - 1] = mainNodes;
+                secNodesTotal[i - 1] = secNodes;
+                lowerNodesTotal[i - 1] = lowerNodes;
+            }
             }
             else {
                 //let secCoords = getSecCoords(coordZ, secSpacing);
-
+                for (let i = 1; i < coordY.length; i++) {
                 [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsZ(editor, coordX, height, coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in Z
 
                 [columns, lowerNodes] = generateColumnsX(editor, coordX, 0, coordZ, mainNodes, sections[2]); //Auto generate columns 
-            }
 
-            nodes = mainNodes.concat(secNodes);
-            nodes = lowerNodes.concat(nodes);
+                mainBeamsTotal[i - 1] = mainBeams;
+                secBeamsTotal[i - 1] = secondaryBeams;
+                columnsTotal[i - 1] = columns;
+                mainNodesTotal[i - 1] = mainNodes;
+                secNodesTotal[i - 1] = secNodes;
+                lowerNodesTotal[i - 1] = lowerNodes;
+                }
+            }
+            //nodes = mainNodes.concat(secNodes);
+            //nodes = lowerNodes.concat(nodes);
+            // console.log(mainBeamsTotal ,secBeamsTotal,columnsTotal, mainNodesTotal,secNodesTotal, lowerNodesTotal);
+            return [mainBeamsTotal, secBeamsTotal, columnsTotal, mainNodesTotal, secNodesTotal, lowerNodesTotal]
         }
     })
 
@@ -83,6 +115,16 @@
             sum += space[i] ?? space;
         }
         return coord;
+    }
+
+    //Turn spacings into elevation levels
+    function getElevation(noInY, heightY) {
+        let coordY = [], coord = 0;
+        for (let i = 0; i < noInY + 1; i++) {
+            coordY[i] = coord;
+            coord += heightY;
+        }
+        return coordY;
     }
         
     init();
@@ -468,4 +510,19 @@
         };
         reader.readAsText(file);
     })
+
+    //used to toggle between dark and light themes
+    window.darkTheme = function () {
+        editor.renderer.setClearColor(0x505050);
+        light.style.display = 'block';
+        dark.style.display = 'none';
+        // beam.visual.mesh.material.color.setHex();
+    }
+
+    window.lightTheme = function () {
+        editor.renderer.setClearColor(0xdddddd);
+        dark.style.display = 'block';
+        light.style.display = 'none';
+    }
+
 })();

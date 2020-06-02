@@ -1,8 +1,8 @@
 {
   "runtimeOptions": {
     "additionalProbingPaths": [
-      "C:\\Users\\Xerblade\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\Xerblade\\.nuget\\packages"
+      "C:\\Users\\Dell\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\Dell\\.nuget\\packages"
     ]
   }
 }
