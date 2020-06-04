@@ -95,8 +95,8 @@ nav ul li a:hover{
   background: #1e1e1e;
 }
 nav ul ul{
-  position: static;
-  display: none;
+/*  position: static;
+*/  display: none;
 }
 nav ul .feat-show.show{
   display: block;
@@ -110,6 +110,9 @@ nav ul .loads-show.show2{
 nav ul .myModel-show.show3{
   display: block;
 }
+/*nav ul .mySelect-show.show5 {
+    display: block;
+}*/
 nav ul ul li{
   line-height: 42px;
   border-top: none;

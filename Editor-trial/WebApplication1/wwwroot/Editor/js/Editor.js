@@ -16,8 +16,7 @@ class Editor {
         this.pickingScene.background = new THREE.Color(0);
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('canvas') });
-        this.id = 0;
-        this.idToObject = [];
+        this.currentId = 0;
         this.canvas;
     }
     init() {
@@ -38,7 +37,7 @@ class Editor {
         orbitControls.mouseButtons = { // Set the functions of mouse buttons
             LEFT: THREE.MOUSE.ROTATE,
             MIDDLE: THREE.MOUSE.PAN,
-            RIGHT: THREE.MOUSE.DOLLY
+            RIGHT: THREE.MOUSE.ROTATE
         };
         //#endregion
 
@@ -94,8 +93,8 @@ class Editor {
         object.material.dispose();
     }
     createPickingObject(object) {
-        this.pickingScene.add(pickingObject(object, ++this.id));
-        this.idToObject[this.id] = object.visual;
+        this.pickingScene.add(pickingObject(object, ++this.currentId));
+        this.picker.recordObject(object, this.currentId);
     }
     toggleBeams() {
         let elements = this.scene.userData.elements;
@@ -123,13 +122,16 @@ class Editor {
         };
     }
     pick(event) {
-        this.picker.pick(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera, this.idToObject);
+        this.picker.pick(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera);
     }
-    select(event) {
-        this.picker.select(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera, this.idToObject);
+    select(event, multiple) {
+        this.picker.select(this.setPickPosition(event), multiple, this.renderer, this.pickingScene, this.camera);
     }
-    selectByArea(initialPosition, finalPosition) {
-        this.picker.getObjects(initialPosition, finalPosition, this.renderer, this.pickingScene, this.camera, this.idToObject)
+    /*addToSelected(event) {
+        this.picker.select(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera);
+    }*/
+    selectByArea(initialPosition, rectWidth, rectHeight, multiple) {
+        this.picker.selectByArea(initialPosition, rectWidth, rectHeight, multiple, this.renderer, this.pickingScene, this.camera)
     }
     clearGroup(group) {
         group = this.scene.userData[group];

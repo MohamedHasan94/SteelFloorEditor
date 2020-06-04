@@ -3,8 +3,8 @@
 (function () {
     //#region  Shared variables
     let editor;
-    let nodes, grids;
-    let columns, mainBeams, secondaryBeams, sections = [];
+    let mainNodes = new Array(), grids;
+    let columns = new Array(), mainBeams = new Array(), secondaryBeams = new Array(), secondaryNodes = new Array(), lowerNodes = new Array(), sections = new Array();
     let canvas;
     let draw = false, drawingPoints = [];
     let sectionId = 0;
@@ -45,57 +45,61 @@
         editor.addToGroup(grids.linesInX, 'grids'); //Add x-grids to scene (as a group)
         editor.addToGroup(grids.linesInZ, 'grids'); //Add z-grids to scene (as a group)
 
-        //each element in the following arrays is the collection of the structural component with respect to 
-        // which floor it is in.
-        var mainBeamsTotal = new Array(coordY.length - 1);
-        var secBeamsTotal = new Array(coordY.length - 1);
-        var columnsTotal = new Array(coordY.length - 1);
-        var mainNodesTotal = new Array(coordY.length - 1);
-        var secNodesTotal = new Array(coordY.length - 1);
-        var lowerNodesTotal = new Array(coordY.length - 1);
-
 
         if (!document.getElementById("autoMode").checked) {
-            nodes = createNodes(editor, coordX, coordZ);
+            mainNodes = createNodesZ(editor, coordX, coordZ);
+            return mainNodes;
         }
         else {
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
             if (document.getElementById("xOrient").checked) {
-                //let secCoords = getSecCoords(coordX, secSpacing);
+                //let secCoords = getSecCoords(coordX, secSpacing); ??
+
+               //creating and adding the Hinged-Nodes to MainNodes Array
+
+                lowerNodesIntial = createNodesZ(editor, coordX, coordZ);
+                mainNodes.push(lowerNodesIntial);
+
                 for (let i = 1; i < coordY.length; i++) {
 
-                    [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsX(editor, coordX, coordY[i], coordZ,
+                    [mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop] = generateMainBeamsX(editor, coordX, coordY[i], coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in X
-                [columns, lowerNodes] = generateColumnsZ(editor, coordX, 0, coordZ, mainNodes, sections[2]); //Auto generate columns
 
-                mainBeamsTotal[i - 1] = mainBeams;
-                secBeamsTotal[i - 1] = secondaryBeams;
-                columnsTotal[i - 1] = columns;
-                mainNodesTotal[i - 1] = mainNodes;
-                secNodesTotal[i - 1] = secNodes;
-                lowerNodesTotal[i - 1] = lowerNodes;
+                    mainNodes.push(mainNodesLoop);
+
+                    [columnsLoop] = generateColumnsZ(editor, coordX, coordZ, mainNodes[i - 1], mainNodes[i], sections[2]); //Auto generate columns
+
+
+                    mainBeams.push(mainBeamsLoop);
+                    secondaryBeams.push(secondaryBeamsLoop);
+                    columns.push(columnsLoop);
+                    secondaryNodes.push(secNodesLoop);
             }
             }
             else {
                 //let secCoords = getSecCoords(coordZ, secSpacing);
+
+                //creating and adding the Hinged-Nodes to MainNodes Array
+                lowerNodesIntial = createNodesX(editor, coordX, coordZ);
+                mainNodes.push(lowerNodesIntial);
+
                 for (let i = 1; i < coordY.length; i++) {
-                [mainBeams, secondaryBeams, mainNodes, secNodes] = generateMainBeamsZ(editor, coordX, height, coordZ,
+                    [mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop] = generateMainBeamsZ(editor, coordX, coordY[i], coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in Z
 
-                [columns, lowerNodes] = generateColumnsX(editor, coordX, 0, coordZ, mainNodes, sections[2]); //Auto generate columns 
+                    mainNodes.push(mainNodesLoop);
 
-                mainBeamsTotal[i - 1] = mainBeams;
-                secBeamsTotal[i - 1] = secondaryBeams;
-                columnsTotal[i - 1] = columns;
-                mainNodesTotal[i - 1] = mainNodes;
-                secNodesTotal[i - 1] = secNodes;
-                lowerNodesTotal[i - 1] = lowerNodes;
+                    [columnsLoop] = generateColumnsX(editor, coordX, coordZ, mainNodes[i-1],mainNodes[i], sections[2]); //Auto generate columns 
+
+
+                    mainBeams.push(mainBeamsLoop);
+                    secondaryBeams.push(secondaryBeamsLoop);
+                    columns.push(columnsLoop);
+                    secondaryNodes.push(secNodesLoop);
                 }
             }
-            //nodes = mainNodes.concat(secNodes);
-            //nodes = lowerNodes.concat(nodes);
-            // console.log(mainBeamsTotal ,secBeamsTotal,columnsTotal, mainNodesTotal,secNodesTotal, lowerNodesTotal);
-            return [mainBeamsTotal, secBeamsTotal, columnsTotal, mainNodesTotal, secNodesTotal, lowerNodesTotal]
+             console.log(mainBeams,secondaryBeams,columns, mainNodes,secondaryNodes, lowerNodes);
+            return [mainBeams,secondaryBeams,columns, mainNodes,secondaryNodes, lowerNodes]
         }
     })
 
@@ -127,13 +131,14 @@
         return coordY;
     }
         
+
     init();
 
     canvas.addEventListener('mousemove', function (event) {
         editor.pick(event);
     });
 
-    canvas.addEventListener('click', function (event) {
+    /*canvas.addEventListener('click', function (event) {
         editor.select(event);
         if (draw) {
             if (editor.picker.selectedObject && editor.picker.selectedObject.geometry instanceof THREE.SphereBufferGeometry) {
@@ -164,22 +169,32 @@
                 }
             }
         }
-    });
-
+    });*/
+    ////////////////////////////////////////////////////////
     //Try Area selection
-    /*let initialPosition;
+    let initialPosition;
+    let multiple = false;
     canvas.onmousedown = function (event) {
         initialPosition = editor.setPickPosition(event);
-        console.log(initialPosition);
     }
 
     let finalPosition;
     canvas.onmouseup = function (event) {
         finalPosition = editor.setPickPosition(event);
-        console.log(finalPosition);
-        editor.selectByArea(initialPosition, finalPosition)
-    }*/
+        if (initialPosition.x === finalPosition.x && initialPosition.y === finalPosition.y)
+            editor.select(event, multiple);
+        else {
+            let rectWidth = Math.abs(finalPosition.x - initialPosition.x),
+                rectHeight = Math.abs(finalPosition.y - initialPosition.y);
 
+            //The start position of the rectangle sholud be the top left corner
+            if (finalPosition.x < initialPosition.x)
+                initialPosition.x = finalPosition.x;
+            if (finalPosition.y < initialPosition.y)
+                initialPosition.y = finalPosition.y;
+            editor.selectByArea(initialPosition, rectWidth, rectHeight, multiple);
+        }
+    }
 
     window.addEventListener('keyup', function (event) {
         switch (event.key) {
@@ -198,67 +213,79 @@
             case 'd':
                 draw = draw ? false : true;
                 break;
+
+            case 'Control':
+                multiple = false;
+                break;
         }
     });
-    
-    window.deleteElement = function () {
 
-        if (editor.picker.selectedObject) {
-            if (editor.picker.selectedObject.userData.element instanceof Beam) {
-                editor.removeFromGroup(editor.picker.selectedObject, 'elements');
-                let index = mainBeams.indexOf(editor.picker.selectedObject.userData.element);
+    window.onkeydown = (event) => {
+        if (event.key === 'Control')
+            multiple = true;
+    }
+
+    window.deleteElement = function () {
+        for (let item of editor.picker.selectedObject) {
+            if (item.userData.element instanceof Beam) {
+                editor.removeFromGroup(item, 'elements');
+                let index = mainBeams.indexOf(item.userData.element);
                 if (index !== -1) mainBeams.splice(index, 1);
                 else {
-                    index = secondaryBeams.indexOf(editor.picker.selectedObject.userData.element);
+                    index = secondaryBeams.indexOf(item.userData.element);
                     secondaryBeams.splice(index, 1); //Use 'delete' ??!!
                 }
             }
-            else if (editor.picker.selectedObject.userData.element instanceof Column) {
-                editor.removeFromGroup(editor.picker.selectedObject, 'elements');
-                let index = columns.indexOf(editor.picker.selectedObject.userData.element);
+            else if (item.userData.element instanceof Column) {
+                editor.removeFromGroup(item, 'elements');
+                let index = columns.indexOf(item.userData.element);
                 columns.splice(index, 1);
             }
             else {
-                editor.removeFromGroup(editor.picker.selectedObject, 'nodes');
-                let index = nodes.indexOf(editor.picker.selectedObject.userData.node)
+                editor.removeFromGroup(item, 'nodes');
+                let index = nodes.indexOf(item.userData.node)
                 nodes.splice(index, 1);
             }
-            editor.picker.selectedObject = null;
         }
+        editor.picker.selectedObject.clear();
     }
 
     window.move = function () {
-        if (editor.picker.selectedObject && editor.picker.selectedObject.userData.element) {
-            let displacement = new THREE.Vector3(parseFloat($('#xMove').val()) || 0, parseFloat($('#yMove').val()) || 0, parseFloat($('#zMove').val()) || 0)
-            editor.picker.selectedObject.userData.element.move(displacement);
-            let newStartPosition = editor.picker.selectedObject.position;
-            let newEndPosition = editor.picker.selectedObject.userData.element.data.endPoint;
+        let displacement = new THREE.Vector3(parseFloat($('#xMove').val()) || 0, parseFloat($('#yMove').val()) || 0, parseFloat($('#zMove').val()) || 0)
+        for (let item of editor.picker.selectedObject) {
+            if (item.userData.element) {//Beams or Cloumns only
+                item.userData.element.move(displacement);
+                let newStartPosition = item.position;
+                let newEndPosition = item.userData.element.data.endPoint;
 
-            //Check if nodes already exist at the new position or create new ones.
-            getElementNodes(newStartPosition, newEndPosition, editor.picker.selectedObject.userData.element);
-            editor.picker.selectedObject.userData.picking.position.copy(newStartPosition);
+                //Check if nodes already exist at the new position or create new ones.
+                getElementNodes(newStartPosition, newEndPosition, item.userData.element);
+                item.userData.picking.position.copy(newStartPosition);
+            }
         }
     }
 
     window.copy = function () {
-        if (editor.picker.selectedObject && editor.picker.selectedObject.userData.element) {
-            let displacement = new THREE.Vector3(parseFloat($('#xCopy').val()) || 0, parseFloat($('#yCopy').val()) || 0, parseFloat($('#zCopy').val()) || 0)
-            let replication = parseInt($('#Replication').val());
-            let element = editor.picker.selectedObject.userData.element;
-            for (var i = 0; i < replication; i++) {
-                element = element.clone();
-                element.move(displacement);
+        let displacement = new THREE.Vector3(parseFloat($('#xCopy').val()) || 0, parseFloat($('#yCopy').val()) || 0, parseFloat($('#zCopy').val()) || 0)
+        let replication = parseInt($('#Replication').val());
+        for (let item of editor.picker.selectedObject) {
+            if (item.userData.element) { //Beams or Cloumns only
+                let element = item.userData.element;
+                for (var i = 0; i < replication; i++) {
+                    element = element.clone();
+                    element.move(displacement);
 
-                //Check if nodes already exist at the new position or create new ones.
-                getElementNodes(element.data.startPoint, element.data.endPoint, element);
+                    //Check if nodes already exist at the new position or create new ones.
+                    getElementNodes(element.data.startPoint, element.data.endPoint, element);
 
-                if (element instanceof Beam)
-                    secondaryBeams.push(element);
-                else
-                    columns.push(element);
+                    if (element instanceof Beam)
+                        secondaryBeams.push(element);
+                    else
+                        columns.push(element);
 
-                editor.addToGroup(element.visual.mesh, 'elements');
-                editor.createPickingObject(element);
+                    editor.addToGroup(element.visual.mesh, 'elements');
+                    editor.createPickingObject(element);
+                }
             }
         }
     }
@@ -301,32 +328,31 @@
     }
 
     window.addLineLoad = function () { //Adds a LineLoad to the selected beam
-        if (editor.picker.selectedObject.userData.element instanceof Beam) {
-            let replace = $('#replaceLineLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
-            debugger
-            let load = new LineLoad($('#lineLoadCase').val(), parseFloat($('#lineLoad').val()));
-            let beam = editor.picker.selectedObject.userData.element;
-            let loadIndex = beam.addLoad(load, replace);
-            editor.clearGroup('loads');
-            editor.addToGroup(beam.data.loads[loadIndex].render(beam), 'loads')
-        }
-        else {
-            this.alert('Please Select an object');
+        editor.clearGroup('loads');
+        debugger
+        let replace = $('#replaceLineLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
+        let load = new LineLoad(parseFloat($('#lineLoad').val()), $('#lineLoadCase').val());
+        for (let element of editor.picker.selectedObject) {
+            if (element.userData.element instanceof Beam) {
+                let beam = element.userData.element;
+                let loadIndex = beam.addLoad(load, replace);
+                editor.addToGroup(beam.data.loads[loadIndex].render(beam), 'loads')
+            }
         }
     }
 
+
     window.addPointLoad = function () { //Adds a PointLoad to the selected node
-        if (editor.picker.selectedObject && editor.picker.selectedObject.userData.node) {
-            let replace = $('#replacePointLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
-            let pointLoad = new PointLoad($('#pointLoadCase').val(), parseFloat($('#pointLoad').val()));
-            debugger
-            let node = editor.picker.selectedObject.userData.node;
-            editor.clearGroup('loads');
-            let loadIndex = node.addLoad(pointLoad, replace);
-            editor.addToGroup(node.data.loads[loadIndex].render(node.data.position.clone()), 'loads')
-        }
-        else {
-            this.alert('Please Select an object');
+        editor.clearGroup('loads');
+        let replace = $('#replacePointLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
+        debugger
+        let pointLoad = new PointLoad(parseFloat($('#pointLoad').val()), $('#pointLoadCase').val());
+        for (let element of editor.picker.selectedObject) {
+            if (element.userData.node) {
+                let node = element.userData.node;
+                let loadIndex = node.addLoad(pointLoad, replace);
+                editor.addToGroup(node.data.loads[loadIndex].render(node.data.position.clone()), 'loads')
+            }
         }
     }
 
@@ -357,31 +383,34 @@
     }
 
     window.changeSection = function () {
-        if (editor.picker.selectedObject.userData.element) {
-            let sectionName = $('#section').val();
-            let existingSection = sections.find(s => s.name == sectionName);
-            if (!existingSection) {
-                existingSection = { $id: `s${sections.length}`, name: sectionName };
-                sections.push(existingSection);
-            }
-            editor.picker.selectedObject.userData.element.changeSection(existingSection);
+        let sectionName = $('#section').val();
+        let existingSection = sections.find(s => s.name == sectionName);//Check if the section already exists
+        if (!existingSection) {//if not create a new one
+            existingSection = { $id: `s${sections.length}`, name: sectionName };
+            sections.push(existingSection);
         }
-        else
-            this.alert('Please select an element first')
+        for (let item of editor.picker.selectedObject) {
+            if (item.userData.element) { // Beams and columns only
+                item.userData.element.changeSection(existingSection);
+            }
+        }
     }
 
     window.addNodeToBeam = function () {
-        if (editor.picker.selectedObject && editor.picker.selectedObject.userData.element instanceof Beam) {
-            let element = editor.picker.selectedObject.userData.element;
-            let distances = $('#nodeToBeam').val().split(',');
-            for (var i = 0; i < distances.length; i++) {
-                let displacement = element.visual.direction.clone().multiplyScalar(parseFloat(distances[i]));
-                let nodePosition = element.data.startPoint.clone().add(displacement);
-                let node = new Node(nodePosition.x, nodePosition.y, nodePosition.z);
-                element.data.innerNodes.push({ "$ref": node.data.$id });
-                nodes.push(node);
-                editor.addToGroup(node.visual.mesh, 'nodes');
-                editor.createPickingObject(node);
+        let distances = $('#nodeToBeam').val().split(',').map(d => this.parseFloat(d));
+        let element;
+        for (let item of editor.picker.selectedObject) {
+            if (item.userData.element instanceof Beam) {
+                element = item.userData.element;
+                for (var i = 0; i < distances.length; i++) {
+                    let displacement = element.visual.direction.clone().multiplyScalar(distances[i]);
+                    let nodePosition = element.data.startPoint.clone().add(displacement);
+                    let node = new Node(nodePosition.x, nodePosition.y, nodePosition.z);
+                    element.data.innerNodes.push({ "$ref": node.data.$id });
+                    nodes.push(node);
+                    editor.addToGroup(node.visual.mesh, 'nodes');
+                    editor.createPickingObject(node);
+                }
             }
         }
     }
@@ -424,12 +453,13 @@
     }
 
     function createModel() { //Serialize model components to JSON
-        let model = { nodes: [], sections: [], secondaryBeams: [], sections, mainBeams: [], columns: [] };
+        let model = { nodes: [], sections: [], secondaryBeams: [], sections: [], mainBeams: [], columns: [] };
         for (var i = 0; i < nodes.length; i++) {
             model.nodes.push(nodes[i].data);
         }
 
         model.sections = sections;
+
 
         for (var i = 0; i < secondaryBeams.length; i++) {
             model.secondaryBeams.push(secondaryBeams[i].data);
@@ -513,7 +543,7 @@
 
     //used to toggle between dark and light themes
     window.darkTheme = function () {
-        editor.renderer.setClearColor(0x505050);
+        editor.renderer.setClearColor(0x000000);
         light.style.display = 'block';
         dark.style.display = 'none';
         // beam.visual.mesh.material.color.setHex();

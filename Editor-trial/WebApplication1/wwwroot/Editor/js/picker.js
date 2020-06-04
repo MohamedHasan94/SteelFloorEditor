@@ -5,22 +5,25 @@ class GPUPickHelper {
         //Create Array to store the  color (RGBA) of each pixel (4 elements per each pixel)
         this.pixelBuffer = new Uint8Array(4 * 81);
         this.pickedObject = null;
-        this.selectedObject = null;
+        this.selectedObject = new Set();
+        this.tempSelected = new Set(); //get the area selected elements and move them to selectedObject
         this.emissiveFlash = 0xcc5511;
+        this.objectIds = [];
+    }
+    recordObject(object, id) { //Record the object with its id in the objects array 
+        this.objectIds[id] = object.visual;
     }
 
-    getObject(cssPosition, renderer, pickingScene, camera, idToObject) {
-        const { pickingTexture, pixelBuffer } = this;
-        // set the view offset to represent just the (9*9 pixels) area around the mouse
+    renderPicking(position, width, height, renderer, pickingScene, camera, pickingTexture, pixelBuffer) {
         const pixelRatio = renderer.getPixelRatio();
         //move camera to the required area
         camera.setViewOffset(
             renderer.getContext().drawingBufferWidth,   // full width
             renderer.getContext().drawingBufferHeight,  // full top
-            (cssPosition.x - 4) * pixelRatio | 0,       // rect x
-            (cssPosition.y - 4) * pixelRatio | 0,       // rect y
-            9,                                          // rect width
-            9,                                          // rect height
+            position.x * pixelRatio | 0,                // rect x
+            position.y * pixelRatio | 0,                // rect y
+            width,                                      // rect width
+            height,                                     // rect height
         );
 
         // render the scene
@@ -33,96 +36,84 @@ class GPUPickHelper {
         //read the pixels colors
         renderer.readRenderTargetPixels(
             pickingTexture,
-            0,   // x-offset
-            0,   // y-offset
-            9,   // width
-            9,   // height
+            0,              // x-offset
+            0,              // y-offset
+            width,          // width
+            height,         // height
             pixelBuffer);
+    }
 
-        for (let i = 2; i < pixelBuffer.length; i += 4) {
-            if (pixelBuffer[i]) { // Check if the Blue component has a value
-                let id = pixelBuffer[i] | pixelBuffer[i - 1] << 8; //Combine Blue and Green Components
-                return idToObject[id].mesh; //Only the first colored pixel is needed
+    getObject(cssPosition, renderer, pickingScene, camera) {
+        cssPosition.x -= 4;
+        cssPosition.y -= 4;
+
+        this.renderPicking(cssPosition, 9, 9, renderer, pickingScene, camera, this.pickingTexture, this.pixelBuffer);
+
+        for (let i = 2; i < this.pixelBuffer.length; i += 4) {
+            if (this.pixelBuffer[i]) { // Check if the Blue component has a value
+                //Only the first colored pixel is needed
+                return this.objectIds[this.pixelBuffer[i] | this.pixelBuffer[i - 1] << 8].mesh;
             }
         }
 
         return null;
     }
+
     //Trial
-    getObjects(initialPosition, finalPosition, renderer, pickingScene, camera, idToObject) {
-        let rectWidth = finalPosition.x - initialPosition.x,
-            rectHeight = finalPosition.y - initialPosition.y;
-        debugger
+    getObjects(initialPosition, rectWidth, rectHeight, renderer, pickingScene, camera) {
         let pickingTexture = new THREE.WebGLRenderTarget(rectWidth, rectHeight);
         let pixelsBuffer = new Uint8Array(4 * rectWidth * rectHeight);
-        // set the view offset to represent just the (9*9 pixels) area around the mouse
-        const pixelRatio = renderer.getPixelRatio();
-        //move camera to the required area
-        camera.setViewOffset(
-            renderer.getContext().drawingBufferWidth,   // full width
-            renderer.getContext().drawingBufferHeight,  // full top
-            initialPosition.x * pixelRatio | 0,       // rect x
-            initialPosition.y * pixelRatio | 0,       // rect y
-            rectWidth,                                          // rect width
-            rectHeight,                                          // rect height
-        );
 
-        // render the scene
-        renderer.setRenderTarget(pickingTexture);
-        renderer.render(pickingScene, camera);
-        //Reset the settings of renderer and camera
-        renderer.setRenderTarget(null);
-        camera.clearViewOffset();
+        this.renderPicking(initialPosition, rectWidth, rectHeight, renderer, pickingScene,
+            camera, pickingTexture, pixelsBuffer);
 
-        //read the pixels colors
-        renderer.readRenderTargetPixels(
-            pickingTexture,
-            0,   // x-offset
-            0,   // y-offset
-            rectWidth,       // width                                   
-            rectHeight,      // height
-            /*9,   //width
-            9,   // height*/
-            pixelsBuffer);
-        let ids = new Set();
+
         for (let i = 2; i < pixelsBuffer.length; i += 4) {
-            id =(pixelsBuffer[i] | pixelsBuffer[i - 1] << 8); //Combine Blue and Green Components
-            let object = idToObject[id] 
-            if (object && object.userData['node'])
-                objects.push(object)
-
             if (pixelsBuffer[i]) { // Check if the Blue component has a value
-                ids.add(pixelsBuffer[i] | pixelsBuffer[i - 1] << 8); //Combine Blue and Green Components
-                //return idToObject[id].mesh; //Only the first colored pixel is needed
+                this.tempSelected.add(this.objectIds[pixelsBuffer[i] | pixelsBuffer[i - 1] << 8].mesh); //Combine Blue and Green Components
             }
         }
-        debugger
-        console.log(ids);
-        return null;
     }
 
-    select(cssPosition, renderer, pickingScene, camera, idToObject) { //On mouse click
+    selectByArea(initialPosition, rectWidth, rectHeight, multiple, renderer, pickingScene, camera) { //On mouse click
         // restore the color if there is a picked object
-        if (this.selectedObject) {
-            this.selectedObject.material.color.setHex(this.selectedObject.material.color.getHex() - this.emissiveFlash);
-        }
+        if (!multiple)
+            this.unselect();
 
-        this.selectedObject = this.getObject(cssPosition, renderer, pickingScene, camera, idToObject);
-        if (this.selectedObject) {
-            this.selectedObject.material.color.setHex(this.selectedObject.material.color.getHex() + this.emissiveFlash);
-            if (this.selectedObject.userData.element) {
-                $('#beamSection').val(this.selectedObject.userData.element.data.section);
-                $('#beamStart').val(`${this.selectedObject.userData.element.data.startPoint.x},${this.selectedObject.userData.element.data.startPoint.y},${this.selectedObject.userData.element.data.startPoint.z}`);
-                $('#beamEnd').val(`${this.selectedObject.userData.element.data.endPoint.x},${this.selectedObject.userData.element.data.endPoint.y},${this.selectedObject.userData.element.data.endPoint.z}`);
-                $('#beamDead').val(this.selectedObject.userData.element.data.loads.dead ? this.selectedObject.userData.element.data.loads.dead.value : 0);
-                $('#beamLive').val(this.selectedObject.userData.element.data.loads.live ? this.selectedObject.userData.element.data.loads.live.value : 0);
+        this.getObjects(initialPosition, rectWidth, rectHeight, renderer, pickingScene, camera);
+
+        for (let item of this.tempSelected) {
+            item.material.color.setHex(item.material.color.getHex() + this.emissiveFlash);
+            this.selectedObject.add(item);
+        }
+        this.tempSelected.clear();
+    }
+
+    select(cssPosition, multiple, renderer, pickingScene, camera) { //On mouse click
+        // restore the color if there is a picked object
+        if (!multiple)
+            this.unselect();
+
+        let object = this.getObject(cssPosition, renderer, pickingScene, camera, this.objectIds);
+
+        if (object) {
+            this.selectedObject.add(object);
+            object.material.color.setHex(object.material.color.getHex() + this.emissiveFlash);
+            if (object.userData.element) {
+                $('#beamSection').val(object.userData.element.data.section);
+                $('#beamStart').val(`${object.userData.element.data.startPoint.x},${object.userData.element.data.startPoint.y},${object.userData.element.data.startPoint.z}`);
+                $('#beamEnd').val(`${object.userData.element.data.endPoint.x},${object.userData.element.data.endPoint.y},${object.userData.element.data.endPoint.z}`);
+                $('#beamDead').val(object.userData.element.data.loads.dead ? object.userData.element.data.loads.dead.value : 0);
+                $('#beamLive').val(object.userData.element.data.loads.live ? object.userData.element.data.loads.live.value : 0);
             }
         }
     }
 
     unselect() {
-        this.selectedObject.material.color.setHex(this.selectedObject.material.color.getHex() - this.emissiveFlash);
-        this.selectedObject = null;
+        for (let item of this.selectedObject) {
+            item.material.color.setHex(item.material.color.getHex() - this.emissiveFlash);
+        }
+        this.selectedObject.clear();
     }
 
     pick(cssPosition, renderer, pickingScene, camera, idToObject) { //On mouse hover

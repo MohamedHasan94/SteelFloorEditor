@@ -2,9 +2,9 @@ var dark=document.getElementById("dark");
 var light=document.getElementById("light");
 light.style.display='none';
 
-$(function () {
-    $('[data-toggle="popover"]').popover()
-  })
+//$(function () {
+//    $('[data-toggle="popover"]').popover()
+//  })
 
 $('#sidebarBtn').click(function () {
     $(this).toggleClass("click");
@@ -58,6 +58,17 @@ $('.myModel-btn').click(function () {
     $('nav ul .myModel-show').toggleClass("show3");
     $('nav ul .fourth').toggleClass("rotate");
 });
+
+//$('#mySelectBtn').click(function () {
+//    $('#mySelectShow').fadeToggle();
+//});
+
+//$('.mySelect-btn').click(function () {
+//    console.log("jqworking");
+//    $('nav ul .mySelect-show').toggleClass("show5");
+//    $('nav ul .fifth').toggleClass("rotate");
+//});
+
 $('nav ul li').click(function () {
     $(this).addClass("active").siblings().removeClass("active");
 });

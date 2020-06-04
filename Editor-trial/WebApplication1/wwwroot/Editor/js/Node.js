@@ -36,14 +36,29 @@ class Node {
     }
 }
 
-
-function createNodes(editor, coordX, coordZ) {
+//Naming with X or Z denotes the outer loop
+function createNodesX(editor, coordX, coordZ) {
     let nodes = [];
     let k = 0;
     for (let i = 0; i < coordX.length; i++) {
         for (let j = 0; j < coordZ.length; j++) {
 
-            nodes.push(new Node(coordX[i], 0, coordZ[j]));
+            nodes.push(new Node(coordX[i], 0, coordZ[j], 'Hinge'));
+            editor.addToGroup(nodes[k].visual.mesh, 'nodes');
+            editor.createPickingObject(nodes[k]);
+            k++;
+        }
+    }
+    return nodes;
+}
+
+function createNodesZ(editor, coordX, coordZ) {
+    let nodes = [];
+    let k = 0;
+    for (let i = 0; i < coordZ.length; i++) {
+        for (let j = 0; j < coordX.length; j++) {
+
+            nodes.push(new Node(coordX[j], 0, coordZ[i], 'Hinge'));
             editor.addToGroup(nodes[k].visual.mesh, 'nodes');
             editor.createPickingObject(nodes[k]);
             k++;

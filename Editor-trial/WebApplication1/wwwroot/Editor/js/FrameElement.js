@@ -54,6 +54,8 @@ class ElementData { //Data required for analysis and design
         this.startNode = startNode ? { "$ref":startNode.data.$id } : null; // Reference to node in JSON scheme
         this.endNode = endNode ? { "$ref": endNode.data.$id } : null; // Reference to node in JSON scheme
         this.loads = [];
+        this.length = endPoint.distanceTo(startPoint);
+
     }
 }
 

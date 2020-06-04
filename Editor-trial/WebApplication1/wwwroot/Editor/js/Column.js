@@ -3,7 +3,7 @@ class Column extends FrameElement {
         let direction = (vector.clone().subVectors(endPoint, startPoint)).normalize();
         let rotation = new THREE.Euler(direction.angleTo(zVector), 0, 0);
         super(section, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode, direction, rotation);
-        this.data.height = endPoint.distanceTo(startPoint);
+        //this.data.height = endPoint.distanceTo(startPoint);
         this.visual.mesh.userData.element = this;
     }
     clone() { //Create a copy of this instance
@@ -18,50 +18,43 @@ class Column extends FrameElement {
     }*/
 }
 
-function generateColumnsX(editor, coordX, coordY, coordZ, mainNodes, section, sectionId) {
-    let lowerNodes = [], columns = [];
+function generateColumnsX(editor, coordX, coordZ, mainNodesA, mainNodesB, section, sectionId) {
+    let columns = [];
     let xNo = coordX.length, zNo = coordZ.length;
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
     for (let i = 0; i < xNo; i++) {
 
         for (let j = 0; j < zNo; j++) {
-            let node = new Node(coordX[i], coordY, coordZ[j], 'Hinge');
-            editor.addToGroup(node.visual.mesh, 'nodes');
-            editor.createPickingObject(node);
-            lowerNodes.push(node);
-            let column = new Column(section.$id, mainNodes[i * zNo + j].data.position.clone(), lowerNodes[i * zNo + j].data.position.clone(),
-                shape, lineMaterial.clone(), meshMaterial.clone(), mainNodes[i * zNo + j], lowerNodes[i * zNo + j]);
+            let column = new Column(section.$id, mainNodesB[i * zNo + j].data.position.clone(), mainNodesA[i * zNo + j].data.position.clone(),
+                shape, lineMaterial.clone(), meshMaterial.clone(), mainNodesB[i * zNo + j], mainNodesA[i * zNo + j]);
             columns.push(column);
             editor.addToGroup(column.visual.mesh, 'elements');
             editor.createPickingObject(column);
         }
 
     }
-    return [columns, lowerNodes];
+    return [columns];
 }
 
-function generateColumnsZ(editor, coordX, coordY, coordZ, mainNodes, section, sectionId) {
-    let lowerNodes = [], columns = [];
+function generateColumnsZ(editor, coordX, coordZ, mainNodesA, mainNodesB, section, sectionId) {
+    let columns = [];
     let xNo = coordX.length, zNo = coordZ.length;
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
     for (let i = 0; i < zNo; i++) {
 
         for (let j = 0; j < xNo; j++) {
-            let node = new Node(coordX[j], coordY, coordZ[i], 'Hinge');
-            editor.addToGroup(node.visual.mesh, 'nodes');
-            editor.createPickingObject(node);
-            lowerNodes.push(node);
-            let column = new Column(section.$id, mainNodes[i * xNo + j].data.position.clone(), lowerNodes[i * xNo + j].data.position.clone(),
-                shape, lineMaterial.clone(), meshMaterial.clone(), mainNodes[i * xNo + j], lowerNodes[i * xNo + j]);
+
+            let column = new Column(section.$id, mainNodesB[i * xNo + j].data.position.clone(), mainNodesA[i * xNo + j].data.position.clone(),
+                shape, lineMaterial.clone(), meshMaterial.clone(), mainNodesB[i * xNo + j], mainNodesA[i * xNo + j]);
             columns.push(column);
             editor.addToGroup(column.visual.mesh, 'elements');
             editor.createPickingObject(column);
         }
 
     }
-    return [columns, lowerNodes];
+    return [columns];
 }
 
 function drawColumnByTwoPoints(section, startNode, endNode) {
