@@ -67,7 +67,7 @@ nav ul li a{
   color: white;
   text-decoration: none;
   font-size: 18px;
-  padding-left: 40px;
+  padding-left: 20px;
   font-weight: 500;
   display: block;
   width: 100%;
@@ -177,5 +177,15 @@ nav ul li a span.rotate{
     display: none;
 }
 #addNodeBeamDetails {
+    display: none;
+}
+
+#addPointLoadDetails {
+    display: none;
+}
+#addLineLoadDetails {
+    display: none;
+}
+#addFloorLoadDetails {
     display: none;
 }

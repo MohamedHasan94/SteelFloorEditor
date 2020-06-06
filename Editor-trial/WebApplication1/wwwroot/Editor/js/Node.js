@@ -7,9 +7,9 @@ class Node {
     constructor(coordX, coordY, coordZ, support) {
         this.data = {};
         this.data.$id = `${++id}`; //Metadata for JSON Referencing(to reference nodes in beams)
-        this.data.support = support;
-        this.data.position = new THREE.Vector3(coordX, coordY, coordZ);  //TODO : Switch Y & Z?!
-        this.data.loads = [];
+        this.data.support = support ?? 0;
+        this.data.position = new THREE.Vector3(coordX, coordY, coordZ);  //TODO : Switch Y & Z?!	
+        this.data.pointLoads = [];
 
         this.visual = {};
         if (this.data.support) {
@@ -23,15 +23,15 @@ class Node {
         this.visual.mesh.userData.node = this;
     }
     addLoad(load, replace) {
-        let index = this.data.loads.findIndex(l => l.loadCase === load.loadCase);
-        if (index < 0) { //has no load of the same case(pattern)
-            this.data.loads.push(load);
-            index = this.data.loads.length - 1;
+        let index = this.data.pointLoads.findIndex(l => l.pattern === load.pattern);
+        if (index < 0) { //has no load of the same case(pattern)	
+            this.data.pointLoads.push(load);
+            index = this.data.pointLoads.length - 1;
         }
-        else if (replace) //has a load of the same case(pattern) , Replace it
-            this.data.loads[index] = load;
-        else              //has a load of the same case(pattern) , Add to it
-            this.data.loads[index].value += load.value;
+        else if (replace) //has a load of the same case(pattern) , Replace it	
+            this.data.pointLoads[index] = load;
+        else              //has a load of the same case(pattern) , Add to it	
+            this.data.pointLoads[index].magnitude += load.magnitude;
         return index;
     }
 }

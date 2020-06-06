@@ -10,19 +10,20 @@ class Beam extends FrameElement {
         this.visual.mesh.userData.element = this;
     }
     clone() { //Create a copy of this instance
-        return new Beam(this.data.section, this.data.startPoint.clone(), this.data.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
+        return new Beam(this.data.section, this.visual.mesh.position.clone(),
+            this.visual.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
             lineMaterial.clone(), meshMaterial.clone(), this.startNode, this.endNode);
     }
     addLoad(load, replace) {
-        let index = this.data.loads.findIndex(l => l.loadCase === load.loadCase);
+        let index = this.data.lineLoads.findIndex(l => l.pattern === load.pattern);
         if (index < 0) { //has no load of the same case(pattern)
-            this.data.loads.push(load);
-            index = this.data.loads.length - 1;
+            this.data.lineLoads.push(load);
+            index = this.data.lineLoads.length - 1;
         }
         else if (replace) //has a load of the same case(pattern) , Replace it
-            this.data.loads[index] = load;
+            this.data.lineLoads[index] = load;
         else              //has a load of the same case(pattern) , Add to it
-            this.data.loads[index].value += load.value;
+            this.data.lineLoads[index].magnitude += load.magnitude;
         return index;
     }
 }
@@ -49,7 +50,7 @@ function generateMainBeamsZ(editor, coordX, coordY, coordZ, mainSection, secSect
 
     secCoord = getSecCoords(coordZ, secSpacing);
     [secBeams, secNodes] = createXBeams(editor, coordX, coordY, secCoord, secSection, coordZ, nodes, mainBeams);  //Create secondary beams on x-axis
-   
+
     return [mainBeams, secBeams, nodes, secNodes];
 }
 
@@ -61,7 +62,7 @@ function generateMainBeamsX(editor, coordX, coordY, coordZ, mainSection, secSect
 
     secCoord = getSecCoords(coordX, secSpacing);
     [secBeams, secNodes] = createZBeams(editor, secCoord, coordY, coordZ, secSection, coordX, nodes, mainBeams);  //Create secondary beams on z-axis (long direction)
-    
+
     return [mainBeams, secBeams, nodes, secNodes];
 }
 

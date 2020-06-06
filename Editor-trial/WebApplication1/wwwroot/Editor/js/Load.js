@@ -15,7 +15,7 @@ loader.load('/Editor/js/dependencies/helvetiker_regular.typeface.json', function
 
 class Load {
     constructor(magnitude, pattern) {
-        this.magnitude = magnitude;
+        this.magnitude = magnitude*-1;
         this.pattern = pattern;
     }
 }
@@ -26,7 +26,7 @@ class LineLoad extends Load {
     }
     render(beam) {
 
-        let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(beam.data.length, this.value, 1, 1)
+        let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(beam.data.length, this.magnitude, 1, 1)
             , loadMaterial.clone());
 
         let textGeometry = new THREE.TextBufferGeometry(`${this.magnitude}`, {
@@ -41,7 +41,7 @@ class LineLoad extends Load {
 
         mesh.position.copy(beam.visual.mesh.position);
         mesh.position.add(beam.visual.direction.clone().multiplyScalar(0.5 * beam.data.length));
-        mesh.position.y += 0.5 * this.value;
+        mesh.position.y += 0.5 * this.magnitude*-1;
         mesh.rotateY(Math.PI / 2 - beam.visual.mesh.rotation.y);
         return mesh;
     }

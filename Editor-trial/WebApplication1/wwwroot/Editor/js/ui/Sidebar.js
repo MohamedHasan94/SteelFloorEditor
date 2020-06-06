@@ -15,45 +15,58 @@ $('.feat-btn').click(function () {
     $('nav ul .first').toggleClass("rotate");
 });
 
-    $('#elementSec').click(function () {
-        $('#elementSecDetails').fadeToggle();
-    });
+            $('#elementSec').click(function () {
+                $('#elementSecDetails').fadeToggle();
+            });
 
     
-    // $('#elementSec').popover({
-    //     trigger: 'hover'
-    // })
+            // $('#elementSec').popover({
+            //     trigger: 'hover'
+            // })
     
-    $('#elementMove').click(function () {
-        $('#elementMoveDetails').fadeToggle();
-    });
+            $('#elementMove').click(function () {
+                $('#elementMoveDetails').fadeToggle();
+            });
 
-    $('#elementCopy').click(function () {
-        $('#elementCopyDetails').fadeToggle();
-    });
+            $('#elementCopy').click(function () {
+                $('#elementCopyDetails').fadeToggle();
+            });
 
 $('.serv-btn').click(function () {
     $('nav ul .serv-show').toggleClass("show1");
     $('nav ul .second').toggleClass("rotate");
 });
 
-    $('#drawElement').click(function () {
-        $('#drawElementDetails').fadeToggle();
-    });
+            $('#drawElement').click(function () {
+                $('#drawElementDetails').fadeToggle();
+            });
 
-$('#addNodeCoord').click(function () {
-        $('#addNodeCoordDetails').fadeToggle();
-    });
+            $('#addNodeCoord').click(function () {
+                $('#addNodeCoordDetails').fadeToggle();
+            });
 
-$('#addNodeBeam').click(function () {
-    $('#addNodeBeamDetails').fadeToggle();
-});
+            $('#addNodeBeam').click(function () {
+            $('#addNodeBeamDetails').fadeToggle();
+            });
 
 
 $('.loads-btn').click(function () {
     $('nav ul .loads-show').toggleClass("show2");
     $('nav ul .third').toggleClass("rotate");
 });
+            $('#addFloorLoad').click(function () {
+                $('#addFloorLoadDetails').fadeToggle();
+            });
+
+            $('#addLineLoad').click(function () {
+                $('#addLineLoadDetails').fadeToggle();
+            });
+
+            $('#addPointLoad').click(function () {
+                $('#addPointLoadDetails').fadeToggle();
+            });
+
+
 $('.myModel-btn').click(function () {
     $('nav ul .myModel-show').toggleClass("show3");
     $('nav ul .fourth').toggleClass("rotate");

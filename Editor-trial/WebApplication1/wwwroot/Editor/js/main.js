@@ -3,8 +3,8 @@
 (function () {
     //#region  Shared variables
     let editor;
-    let mainNodes = new Array(), grids;
-    let columns = new Array(), mainBeams = new Array(), secondaryBeams = new Array(), secondaryNodes = new Array(), lowerNodes = new Array(), sections = new Array();
+    let nodes=new Array(), grids;
+    let columns = new Array(), mainBeams = new Array(), secondaryBeams = new Array(), sections = new Array();
     let canvas;
     let draw = false, drawingPoints = [];
     let sectionId = 0;
@@ -45,6 +45,7 @@
         editor.addToGroup(grids.linesInX, 'grids'); //Add x-grids to scene (as a group)
         editor.addToGroup(grids.linesInZ, 'grids'); //Add z-grids to scene (as a group)
 
+        
 
         if (!document.getElementById("autoMode").checked) {
             mainNodes = createNodesZ(editor, coordX, coordZ);
@@ -52,19 +53,23 @@
         }
         else {
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
+            let mainNodes = new Array();
             if (document.getElementById("xOrient").checked) {
-                //let secCoords = getSecCoords(coordX, secSpacing); ??
+
 
                //creating and adding the Hinged-Nodes to MainNodes Array
-
                 lowerNodesIntial = createNodesZ(editor, coordX, coordZ);
                 mainNodes.push(lowerNodesIntial);
+                nodes = nodes.concat(lowerNodesIntial);
 
                 for (let i = 1; i < coordY.length; i++) {
 
                     [mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop] = generateMainBeamsX(editor, coordX, coordY[i], coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in X
 
+
+                    nodesLoop = mainNodesLoop.concat(secNodesLoop);
+                    nodes = nodes.concat(nodesLoop);
                     mainNodes.push(mainNodesLoop);
 
                     [columnsLoop] = generateColumnsZ(editor, coordX, coordZ, mainNodes[i - 1], mainNodes[i], sections[2]); //Auto generate columns
@@ -73,20 +78,21 @@
                     mainBeams.push(mainBeamsLoop);
                     secondaryBeams.push(secondaryBeamsLoop);
                     columns.push(columnsLoop);
-                    secondaryNodes.push(secNodesLoop);
             }
             }
             else {
-                //let secCoords = getSecCoords(coordZ, secSpacing);
 
                 //creating and adding the Hinged-Nodes to MainNodes Array
                 lowerNodesIntial = createNodesX(editor, coordX, coordZ);
                 mainNodes.push(lowerNodesIntial);
+                nodes= nodes.concat(lowerNodesIntial);
 
                 for (let i = 1; i < coordY.length; i++) {
                     [mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop] = generateMainBeamsZ(editor, coordX, coordY[i], coordZ,
                     sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in Z
 
+                    nodesLoop = mainNodesLoop.concat(secNodesLoop);
+                    nodes= nodes.concat(nodesLoop);
                     mainNodes.push(mainNodesLoop);
 
                     [columnsLoop] = generateColumnsX(editor, coordX, coordZ, mainNodes[i-1],mainNodes[i], sections[2]); //Auto generate columns 
@@ -95,11 +101,10 @@
                     mainBeams.push(mainBeamsLoop);
                     secondaryBeams.push(secondaryBeamsLoop);
                     columns.push(columnsLoop);
-                    secondaryNodes.push(secNodesLoop);
                 }
             }
-             console.log(mainBeams,secondaryBeams,columns, mainNodes,secondaryNodes, lowerNodes);
-            return [mainBeams,secondaryBeams,columns, mainNodes,secondaryNodes, lowerNodes]
+
+            console.log(mainBeams, secondaryBeams, columns,nodes);
         }
     })
 
@@ -195,31 +200,6 @@
             editor.selectByArea(initialPosition, rectWidth, rectHeight, multiple);
         }
     }
-
-    window.addEventListener('keyup', function (event) {
-        switch (event.key) {
-            case 'Delete':
-                deleteElement();
-                break;
-
-            case 'm':
-                move();
-                break;
-
-            case 'c':
-                copy();
-                break;
-
-            case 'd':
-                draw = draw ? false : true;
-                break;
-
-            case 'Control':
-                multiple = false;
-                break;
-        }
-    });
-
     window.onkeydown = (event) => {
         if (event.key === 'Control')
             multiple = true;
@@ -256,9 +236,10 @@
             if (item.userData.element) {//Beams or Cloumns only
                 item.userData.element.move(displacement);
                 let newStartPosition = item.position;
-                let newEndPosition = item.userData.element.data.endPoint;
+                let newEndPosition = item.userData.element.visual.endPoint;
 
                 //Check if nodes already exist at the new position or create new ones.
+                console.log(item.userData.element);
                 getElementNodes(newStartPosition, newEndPosition, item.userData.element);
                 item.userData.picking.position.copy(newStartPosition);
             }
@@ -267,7 +248,7 @@
 
     window.copy = function () {
         let displacement = new THREE.Vector3(parseFloat($('#xCopy').val()) || 0, parseFloat($('#yCopy').val()) || 0, parseFloat($('#zCopy').val()) || 0)
-        let replication = parseInt($('#Replication').val());
+        let replication = parseInt($('#Replication').val()); debugger
         for (let item of editor.picker.selectedObject) {
             if (item.userData.element) { //Beams or Cloumns only
                 let element = item.userData.element;
@@ -276,12 +257,14 @@
                     element.move(displacement);
 
                     //Check if nodes already exist at the new position or create new ones.
-                    getElementNodes(element.data.startPoint, element.data.endPoint, element);
+                    getElementNodes(element.visual.mesh.position, element.visual.endPoint, element);
 
                     if (element instanceof Beam)
                         secondaryBeams.push(element);
                     else
                         columns.push(element);
+
+                    console.log(nodes);
 
                     editor.addToGroup(element.visual.mesh, 'elements');
                     editor.createPickingObject(element);
@@ -293,6 +276,7 @@
 
     function getElementNodes(newStartPosition, newEndPosition, element) {
         //Search for the new nodes in the existing nodes
+   
         let newStartNode = nodes.find(n => n.data.position.equals(newStartPosition));
         let newEndNode = nodes.find(n => n.data.position.equals(newEndPosition));
 
@@ -336,7 +320,7 @@
             if (element.userData.element instanceof Beam) {
                 let beam = element.userData.element;
                 let loadIndex = beam.addLoad(load, replace);
-                editor.addToGroup(beam.data.loads[loadIndex].render(beam), 'loads')
+                editor.addToGroup(beam.data.lineLoads[loadIndex].render(beam), 'loads')
             }
         }
     }
@@ -351,7 +335,7 @@
             if (element.userData.node) {
                 let node = element.userData.node;
                 let loadIndex = node.addLoad(pointLoad, replace);
-                editor.addToGroup(node.data.loads[loadIndex].render(node.data.position.clone()), 'loads')
+                editor.addToGroup(node.data.pointLoads[loadIndex].render(node.data.position.clone()), 'loads')
             }
         }
     }
@@ -361,24 +345,24 @@
     }
 
     window.showLoads = function () { // Visualize all load in the selected case
-        let loadCase = $('#showLoadCase').val();
+        let pattern = $('#showLoadCase').val();
         editor.clearGroup('loads');
 
         let index;
         secondaryBeams.forEach(b => {
-            index = b.data.loads.findIndex(l => l.loadCase == loadCase);
+            index = b.data.lineLoads.findIndex(l => l.pattern == pattern);
             if (index > -1)
-                editor.addToGroup((b.data.loads[index]).render(b), 'loads');
+                editor.addToGroup((b.data.lineLoads[index]).render(b), 'loads');
         })
         mainBeams.forEach(b => {
-            index = b.data.loads.findIndex(l => l.loadCase == loadCase);
+            index = b.data.lineLoads.findIndex(l => l.pattern == pattern);
             if (index > -1)
-                editor.addToGroup((b.data.loads[index]).render(b), 'loads');
+                editor.addToGroup((b.data.lineLoads[index]).render(b), 'loads');
         })
         nodes.forEach(n => {
-            index = n.data.loads.findIndex(l => l.loadCase == loadCase);
+            index = n.data.pointLoads.findIndex(l => l.pattern == pattern);
             if (index > -1)
-                editor.addToGroup((n.data.loads[index]).render(n.data.position.clone()), 'loads');
+                editor.addToGroup((n.data.pointLoads[index]).render(n.data.position.clone()), 'loads');
         })
     }
 
@@ -404,7 +388,7 @@
                 element = item.userData.element;
                 for (var i = 0; i < distances.length; i++) {
                     let displacement = element.visual.direction.clone().multiplyScalar(distances[i]);
-                    let nodePosition = element.data.startPoint.clone().add(displacement);
+                    let nodePosition = item.position.clone().add(displacement);
                     let node = new Node(nodePosition.x, nodePosition.y, nodePosition.z);
                     element.data.innerNodes.push({ "$ref": node.data.$id });
                     nodes.push(node);
@@ -453,24 +437,40 @@
     }
 
     function createModel() { //Serialize model components to JSON
-        let model = { nodes: [], sections: [], secondaryBeams: [], sections: [], mainBeams: [], columns: [] };
-        for (var i = 0; i < nodes.length; i++) {
-            model.nodes.push(nodes[i].data);
+        let model = {
+            nodes: [], material: { '$id': 'm', name: 'ST_37' }, sections: [],
+            secondaryBeams: [], mainBeams: [], columns: []
+        };
+
+        model.projectProperties = {
+            "Number": "1",
+            "Name": "AUTRA2",
+            "Designer": "AUTRA2",
+            "Location": "Smart Village",
+            "City": "Giza",
+            "Country": "Egypt"
+        }
+        for (var i = 0; i < nodes[0].length; i++) {
+            model.nodes.push(nodes[0][i].data);
+        }
+
+        for (var i = 0; i < nodes[1].length; i++) {
+            model.nodes.push(nodes[1][i].data);
         }
 
         model.sections = sections;
 
 
-        for (var i = 0; i < secondaryBeams.length; i++) {
-            model.secondaryBeams.push(secondaryBeams[i].data);
+        for (var i = 0; i < secondaryBeams[0].length; i++) {
+            model.secondaryBeams.push(secondaryBeams[0][i].data);
         }
 
-        for (var i = 0; i < mainBeams.length; i++) {
-            model.mainBeams.push(mainBeams[i].data);
+        for (var i = 0; i < mainBeams[0].length; i++) {
+            model.mainBeams.push(mainBeams[0][i].data);
         }
 
-        for (var i = 0; i < columns.length; i++) {
-            model.columns.push(columns[i].data);
+        for (var i = 0; i < columns[0].length; i++) {
+            model.columns.push(columns[0][i].data);
         }
         model = JSON.stringify(model);
         console.log(model)
@@ -546,13 +546,67 @@
         editor.renderer.setClearColor(0x000000);
         light.style.display = 'block';
         dark.style.display = 'none';
-        // beam.visual.mesh.material.color.setHex();
+        for (var i = 0; i < mainBeams.length; i++) {
+        for (var j = 0; j< mainBeams[i].length; j++) {
+            mainBeams[i][j].visual.mesh.material.color.setHex(0xffff00);
+        }
+        }
+
+        for (var i = 0; i < secondaryBeams.length; i++) {
+            for (var j = 0; j < secondaryBeams[i].length; j++) {
+                secondaryBeams[i][j].visual.mesh.material.color.setHex(0xffff00);
+            }
+        }
+
+        for (var i = 0; i < columns.length; i++) {
+            for (var j = 0; j < columns[i].length; j++) {
+                columns[i][j].visual.mesh.material.color.setHex(0xffff00);
+            }
+        }
+
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].data.support) {
+                nodes[i].visual.mesh.material.color.setHex(0xff0000);
+            }
+            else {
+                nodes[i].visual.mesh.material.color.setHex(0x0000ff);
+            }
+        }
+
     }
 
     window.lightTheme = function () {
         editor.renderer.setClearColor(0xdddddd);
         dark.style.display = 'block';
         light.style.display = 'none';
+
+        for (var i = 0; i < mainBeams.length; i++) {
+            for (var j = 0; j < mainBeams[i].length; j++) {
+                mainBeams[i][j].visual.mesh.material.color.setHex(0x000000);
+            }
+        }
+
+        for (var i = 0; i < secondaryBeams.length; i++) {
+            for (var j = 0; j < secondaryBeams[i].length; j++) {
+                secondaryBeams[i][j].visual.mesh.material.color.setHex(0x000000);
+            }
+        }
+
+        for (var i = 0; i < columns.length; i++) {
+            for (var j = 0; j < columns[i].length; j++) {
+                columns[i][j].visual.mesh.material.color.setHex(0x000000);
+            }
+        }
+
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].data.support) {
+                nodes[i].visual.mesh.material.color.setHex(0x6633ff);
+            }
+            else {
+                nodes[i].visual.mesh.material.color.setHex(0xffcc00);
+            }
+        }
+
     }
 
 })();

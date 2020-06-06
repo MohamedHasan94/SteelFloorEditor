@@ -763,22 +763,12 @@ THREE.OrbitControls = function ( object, domElement ) {
 		var mouseAction;
 
 
-		//$('#areaModeOn').click(function () {
-		//	selModeReq = true;
-		//});
-
-
-		//$('#areaModeOff').click(function () {
-		//	selModeReq = false;
-		//});
-
 		switch ( event.button ) {
 
 			case 0 :
 
-			//	if (!selModeReq) {
 				mouseAction = scope.mouseButtons.LEFT;
-                //}
+
 			break;
 
 			case 1:

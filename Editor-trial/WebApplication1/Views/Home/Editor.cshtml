@@ -194,43 +194,54 @@
                 </a>
                 <ul class="loads-show">
                     <li>
-                        <a href="#" onclick="addFloorLoad()">
+                        <a href="#" id="addFloorLoad">
                             Add Floor load
-                        </a></br>
+                        </a>
+                        <div id="addFloorLoadDetails">
+                        <input type="text" id="floorLoad" placeholder="load value" size="10"> <br>
                         <select id="floorLoadCase">
                             <option value="dead">Dead</option>
                             <option value="live">Live</option>
                         </select>
-                        <input type="text" id="floorLoad" placeholder="load value" size="7"> </br>
-                        <!-- <input type="checkbox" id="replace" size="5"> replace -->
+                        <button type="button" class="btn btn-info" onclick="addFloorLoad()">Done</button>
 
+                        <!-- <input type="checkbox" id="replace" size="5"> replace -->
+                         </div>
                     </li>
 
                     <li>
-                        <a href="#" onclick="addLineLoad()">
+                        <a href="#" id="addLineLoad">
                             Add Line load
-                        </a></br>
+                        </a>
+                        <div id="addLineLoadDetails">
+                        <input type="text" id="lineLoad" placeholder="load value" size="10"> <br>
                         <select id="lineLoadCase">
                             <option value="dead">Dead</option>
                             <option value="live">Live</option>
                         </select>
-                        <input type="text" id="lineLoad" placeholder="load value" size="7"> </br>
                         <input type="checkbox" id="replaceLineLoad" size="5"> replace
+                        <button type="button" class="btn btn-info"  onclick="addLineLoad()">Done</button>
+</div>
 
                     </li>
                     <li>
-                        <a href="#" onclick="addPointLoad()">
+                        <a href="#" id="addPointLoad">
                             Add Point load
                         </a>
+                        <div id="addPointLoadDetails">
+                        <input type="text" id="pointLoad" placeholder="load value" size="10">
                         <select id="pointLoadCase">
                             <option value="dead">Dead</option>
                             <option value="live">Live</option>
                         </select>
-                        <input type="text" id="pointLoad" placeholder="load value" size="7">
                         <input type="checkbox" id="replacePointLoad" size="5"> replace
+                        <button type="button" class="btn btn-info"  onclick="addPointLoad()">Done</button>
+                            </div>
+
                     </li>
 
                     <li>
+                        <div style="display:flex">
                         <a href="#" onclick="showLoads()">
                             Show Loads
                         </a>
@@ -238,6 +249,7 @@
                             <option value="dead">Dead</option>
                             <option value="live">Live</option>
                         </select>
+                            </div>
                     </li>
 
                     <li>
@@ -315,6 +327,7 @@
                 </a>
 
             </li>
+
             <li>
                 <a href="#" onclick="toggle()">
                     Toggle View
@@ -350,11 +363,11 @@
                     </div>
                     <div class="form-group">
                         <label for="spaceX">Spacing in X-direction</label>
-                        <input type="text" name="" id="spaceX" class="form-control" value="6*6" required>
+                        <input type="text" name="" id="spaceX" class="form-control" value="3*6" required>
                     </div>
                     <div class="form-group">
                         <label for="spaceZ">Spacing in Z-direction</label>
-                        <input type="text" name="" id="spaceZ" class="form-control" value="6*5" required>
+                        <input type="text" name="" id="spaceZ" class="form-control" value="2*8" required>
                     </div>
                     <div class="form-group">
                         <label for="height">Floor height</label>
