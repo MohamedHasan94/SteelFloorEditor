@@ -56,6 +56,7 @@
         else {
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
             let mainNodes = new Array(), mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop;
+            debugger
             if (document.getElementById("xOrient").checked) {
 
 
@@ -239,7 +240,7 @@
                     for (var i = 0; i < secondaryBeams.length; i++) {
                         index = secondaryBeams[i].indexOf(item.userData.element);
                         if (index > -1) {
-                            secondaryBeams[i].splice(index, 1); //Use 'delete' ??!!
+                            secondaryBeams[i].splice(index, 1);
                             break;
                         }
                     }
@@ -315,16 +316,11 @@
         let newEndNode = nodes.find(n => n.data.position.equals(newEndPosition));
 
         if (!newStartNode) { //If it doesn't exist create one
-            newStartNode = new Node(newStartPosition.x, newStartPosition.y, newStartPosition.z);
-            nodes.push(newStartNode);
-            editor.addToGroup(newStartNode.visual.mesh, 'nodes');
-            editor.createPickingObject(newStartNode)
+            newStartNode = Node.create(newStartPosition.x, newStartPosition.y, newStartPosition.z,
+                null, editor, nodes);
         }
         if (!newEndNode) {//If it doesn't exist create one
-            newEndNode = new Node(newEndPosition.x, newEndPosition.y, newEndPosition.z);
-            nodes.push(newEndNode);
-            editor.addToGroup(newEndNode.visual.mesh, 'nodes');
-            editor.createPickingObject(newEndNode)
+            newEndNode = Node.create(newEndPosition.x, newEndPosition.y, newEndPosition.z, null, editor, nodes);
         }
 
         element.data.startNode = { "$ref": newStartNode.data.$id };
@@ -387,7 +383,7 @@
             for (let j = 0; j < secondaryBeams[i].length; j++) {
                 index = secondaryBeams[i][j].data.lineLoads.findIndex(l => l.pattern == pattern);
                 if (index > -1)
-                    editor.addToGroup((secondaryBeams[i][j].data.lineLoads[index]).render(b), 'loads');
+                    editor.addToGroup((secondaryBeams[i][j].data.lineLoads[index]).render(secondaryBeams[i][j]), 'loads');
             }
         }
 
@@ -395,7 +391,7 @@
             for (let j = 0; j < mainBeams[i].length; j++) {
                 index = mainBeams[i][j].data.lineLoads.findIndex(l => l.pattern == pattern);
                 if (index > -1)
-                    editor.addToGroup((mainBeams[i][j].data.lineLoads[index]).render(b), 'loads');
+                    editor.addToGroup((mainBeams[i][j].data.lineLoads[index]).render(secondaryBeams[i][j]), 'loads');
             }
         }
 
@@ -430,19 +426,17 @@
                 for (var i = 0; i < distances.length; i++) {
                     let displacement = element.visual.direction.clone().multiplyScalar(distances[i]);
                     let nodePosition = item.position.clone().add(displacement);
-                    let node = new Node(nodePosition.x, nodePosition.y, nodePosition.z);
-                    element.data.innerNodes.push({ "$ref": node.data.$id });
-                    nodes.push(node);
-                    editor.addToGroup(node.visual.mesh, 'nodes');
-                    editor.createPickingObject(node);
+
+                    Node.create(nodePosition.x, nodePosition.y, nodePosition.z,
+                        null, editor, nodes);
                 }
             }
         }
     }
 
     window.createNode = function () {
-        let node = new Node(parseFloat($('#nodeXCoord').val()),
-            parseFloat($('#nodeYCoord').val()), parseFloat($('#nodeZCoord').val()));
+        let node = Node.create(parseFloat($('#nodeXCoord').val()),
+            parseFloat($('#nodeYCoord').val()), parseFloat($('#nodeZCoord').val()), null, editor, nodes);
 
         let beam = getIntersectedBeam(node.data.position.clone()); //Beam mesh
         if (beam && beam.userData.element instanceof Beam) {
@@ -455,9 +449,6 @@
 
             beam.data.innerNodes.push({ "$ref": node.data.$id }); //Add the node to the beam inner nodes
         }
-        nodes.push(node);
-        editor.addToGroup(node.visual.mesh, 'nodes');
-        editor.createPickingObject(node);
     }
 
     function getIntersectedBeam(position) { //Checks if a beam exists at the node position 

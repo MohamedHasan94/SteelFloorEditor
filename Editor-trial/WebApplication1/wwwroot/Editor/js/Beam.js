@@ -44,7 +44,7 @@ function getSecCoords(mainCoord, secSpacing) {
 
 //Automatically generate the floor system from user's input with main beams on Z-axis (Creates the nodes with the beams)
 function generateMainBeamsZ(editor, coordX, coordY, coordZ, mainSection, secSection, secSpacing) {
-    let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [], distribution;
+    let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [];
 
     [mainBeams, nodes] = createZBeamsWithNodes(editor, coordX, coordY, coordZ, mainSection); //Create main beams on z-axis
 
@@ -56,7 +56,7 @@ function generateMainBeamsZ(editor, coordX, coordY, coordZ, mainSection, secSect
 
 //Automatically generate the floor system from user's input with main beams on X-axis (Creates the nodes with the beams)
 function generateMainBeamsX(editor, coordX, coordY, coordZ, mainSection, secSection, secSpacing) {
-    let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [], distribution;
+    let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [];
 
     [mainBeams, nodes] = createXBeamsWithNodes(editor, coordX, coordY, coordZ, mainSection); //Create main beams on x-axis (short direction)
 
@@ -79,16 +79,14 @@ function createXBeams(editor, coordX, coordY, coordZ, section, coordZToCheck, no
 
     let k = 0, m = 0, a = -1;
     let n = (coordZ.length - 1) / (coordZToCheck.length - 1); // Counters to relate beams and nodes
-
+    let node1, node2;
     for (let i = 0; i < coordZ.length; i++) {
 
         if ((coordZToCheck[i / n]) / coordZ[i] != 1 && (coordZToCheck[i / n]) / (coordZ[i] + 1) != 0) {
             //Craete a start node for this line
             m++;
-            secBeamsNodes.push(new Node(coordX[0], coordY, coordZ[i]));
-            editor.addToGroup(secBeamsNodes[k].visual.mesh, 'nodes');
-            editor.createPickingObject(secBeamsNodes[k]);
-            mainBeams[(i - m)].data.innerNodes.push({ "$ref": secBeamsNodes[k].data.$id });
+            node1 = Node.create(coordX[0], coordY, coordZ[i], null, editor, secBeamsNodes);
+            mainBeams[(i - m)].data.innerNodes.push({ "$ref": node1.data.$id });
             k++;
         }
         else { a++; }
@@ -100,13 +98,11 @@ function createXBeams(editor, coordX, coordY, coordZ, section, coordZToCheck, no
                     shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordZToCheck.length * j + a], nodes[coordZToCheck.length * (j + 1) + a]);
             }
             else {
-                secBeamsNodes.push(new Node(coordX[j + 1], coordY, coordZ[i]));
-                editor.addToGroup(secBeamsNodes[k].visual.mesh, 'nodes');
-                editor.createPickingObject(secBeamsNodes[k]);
+                node2 = Node.create(coordX[j + 1], coordY, coordZ[i], null, editor, secBeamsNodes);
 
                 beam = new Beam(section.$id, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
-                    shape, lineMaterial.clone(), meshMaterial.clone(), secBeamsNodes[k - 1], secBeamsNodes[k]);
-                mainBeams[((coordZToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": secBeamsNodes[k].data.$id });
+                    shape, lineMaterial.clone(), meshMaterial.clone(), node1, node2);
+                mainBeams[((coordZToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": node2.data.$id });
                 k++;
             }
             beams.push(beam);
@@ -131,10 +127,11 @@ function createZBeams(editor, coordX, coordY, coordZ, section, coordXToCheck, no
 
         if ((coordXToCheck[i / n]) / coordX[i] != 1 && (coordXToCheck[i / n]) / (coordX[i] + 1) != 0) {
             m++;
-            secBeamsNodes.push(new Node(coordX[i], coordY, coordZ[0]));
+            let node = Node.create(coordX[i], coordY, coordZ[0], null, editor, secBeamsNodes);
+            /*secBeamsNodes.push(new Node(coordX[i], coordY, coordZ[0]));
             editor.addToGroup(secBeamsNodes[k].visual.mesh, 'nodes');
-            editor.createPickingObject(secBeamsNodes[k]);
-            mainBeams[(i - m)].data.innerNodes.push({ "$ref": secBeamsNodes[k].data.$id });
+            editor.createPickingObject(secBeamsNodes[k]);*/
+            mainBeams[(i - m)].data.innerNodes.push({ "$ref": node.data.$id });
             k++;
         }
         else { a++; }
@@ -146,13 +143,14 @@ function createZBeams(editor, coordX, coordY, coordZ, section, coordXToCheck, no
                     shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordXToCheck.length * j + a], nodes[coordXToCheck.length * (j + 1) + a]);
             }
             else {
-                secBeamsNodes.push(new Node(coordX[i], coordY, coordZ[j + 1]));
+                let node = Node.create(coordX[i], coordY, coordZ[j + 1], null, editor, secBeamsNodes);
+                /*secBeamsNodes.push(new Node(coordX[i], coordY, coordZ[j + 1]));
                 editor.addToGroup(secBeamsNodes[k].visual.mesh, 'nodes');
-                editor.createPickingObject(secBeamsNodes[k]);
+                editor.createPickingObject(secBeamsNodes[k]);*/
                 beam = new Beam(section.$id, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
                     shape, lineMaterial.clone(), meshMaterial.clone(), secBeamsNodes[k - 1], secBeamsNodes[k]);
 
-                mainBeams[((coordXToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": secBeamsNodes[k].data.$id });
+                mainBeams[((coordXToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": node.data.$id });
                 k++;
             }
             beams.push(beam);
@@ -164,7 +162,7 @@ function createZBeams(editor, coordX, coordY, coordZ, section, coordXToCheck, no
 }
 
 //Main beams on Z (Creates both beams and nodes)
-function createZBeamsWithNodes(editor, coordX, coordY, coordZ, section, mainSectionId) {
+function createZBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
     let beams = [];
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
@@ -173,15 +171,12 @@ function createZBeamsWithNodes(editor, coordX, coordY, coordZ, section, mainSect
     let k = 0;
 
     for (let i = 0; i < coordX.length; i++) {
-        nodes.push(new Node(coordX[i], coordY, coordZ[0]));
-        editor.addToGroup(nodes[k].visual.mesh, 'nodes');
-        editor.createPickingObject(nodes[k]);
+        Node.create(coordX[i], coordY, coordZ[0], null, editor, nodes);
         k++;
 
         for (let j = 0; j < coordZ.length - 1; j++) {
-            nodes.push(new Node(coordX[i], coordY, coordZ[j + 1]));
-            editor.addToGroup(nodes[k].visual.mesh, 'nodes');
-            editor.createPickingObject(nodes[k]);
+            Node.create(coordX[i], coordY, coordZ[j + 1], null, editor, nodes);
+
             let beam = new Beam(section.$id, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
                 shape, lineMaterial.clone(), meshMaterial.clone(), nodes[k - 1], nodes[k]);
             beams.push(beam);
@@ -203,16 +198,11 @@ function createXBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
     let k = 0;
 
     for (let i = 0; i < coordZ.length; i++) {
-
-        nodes.push(new Node(coordX[0], coordY, coordZ[i]));
-        editor.addToGroup(nodes[k].visual.mesh, 'nodes');
-        editor.createPickingObject(nodes[k]);
+        Node.create(coordX[0], coordY, coordZ[i], null, editor, nodes);
         k++;
 
         for (let j = 0; j < coordX.length - 1; j++) {
-            nodes.push(new Node(coordX[j + 1], coordY, coordZ[i]));
-            editor.addToGroup(nodes[k].visual.mesh, 'nodes');
-            editor.createPickingObject(nodes[k]);
+            Node.create(coordX[j + 1], coordY, coordZ[i], null, editor, nodes);
 
             let beam = new Beam(section.$id, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
                 shape, lineMaterial.clone(), meshMaterial.clone(), nodes[k - 1], nodes[k]);

@@ -1,208 +1,64 @@
 {
     "nodes": [
         {
-            "$id": "22",
-            "support": 1,
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "23",
-            "support": 1,
-            "position": {
-                "x": 6,
-                "y": 0,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "24",
-            "support": 1,
-            "position": {
-                "x": 12,
-                "y": 0,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "25",
-            "support": 1,
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 5
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "26",
-            "support": 1,
-            "position": {
-                "x": 6,
-                "y": 0,
-                "z": 5
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "27",
-            "support": 1,
-            "position": {
-                "x": 12,
-                "y": 0,
-                "z": 5
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "28",
-            "support": 1,
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 10
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "29",
-            "support": 1,
-            "position": {
-                "x": 6,
-                "y": 0,
-                "z": 10
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "30",
-            "support": 1,
-            "position": {
-                "x": 12,
-                "y": 0,
-                "z": 10
-            },
-            "pointLoads": []
-        },
-        {
             "$id": "1",
-            "support": 0,
+            "support": "Hinge",
             "position": {
                 "x": 0,
-                "y": 3,
+                "y": 0,
                 "z": 0
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.5,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.25,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "2",
-            "support": 0,
+            "support": "Hinge",
             "position": {
                 "x": 6,
-                "y": 3,
+                "y": 0,
                 "z": 0
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "3",
-            "support": 0,
+            "support": "Hinge",
             "position": {
-                "x": 12,
-                "y": 3,
-                "z": 0
+                "x": 0,
+                "y": 0,
+                "z": 8
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.5,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.25,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "4",
-            "support": 0,
+            "support": "Hinge",
             "position": {
-                "x": 0,
-                "y": 3,
-                "z": 5
+                "x": 6,
+                "y": 0,
+                "z": 8
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "5",
             "support": 0,
             "position": {
-                "x": 6,
+                "x": 0,
                 "y": 3,
-                "z": 5
+                "z": 0
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "6",
             "support": 0,
             "position": {
-                "x": 12,
+                "x": 6,
                 "y": 3,
-                "z": 5
+                "z": 0
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "7",
@@ -210,18 +66,9 @@
             "position": {
                 "x": 0,
                 "y": 3,
-                "z": 10
+                "z": 8
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.5,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.25,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "8",
@@ -229,37 +76,19 @@
             "position": {
                 "x": 6,
                 "y": 3,
-                "z": 10
+                "z": 8
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "9",
             "support": 0,
             "position": {
-                "x": 12,
+                "x": 2,
                 "y": 3,
-                "z": 10
+                "z": 0
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.5,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.25,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "10",
@@ -267,227 +96,29 @@
             "position": {
                 "x": 2,
                 "y": 3,
-                "z": 0
+                "z": 8
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "11",
             "support": 0,
             "position": {
-                "x": 2,
+                "x": 4,
                 "y": 3,
-                "z": 5
+                "z": 0
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                }
-            ]
+            "pointLoads": []
         },
         {
             "$id": "12",
             "support": 0,
             "position": {
-                "x": 2,
-                "y": 3,
-                "z": 10
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
-        },
-        {
-            "$id": "13",
-            "support": 0,
-            "position": {
                 "x": 4,
                 "y": 3,
-                "z": 0
+                "z": 8
             },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
-        },
-        {
-            "$id": "14",
-            "support": 0,
-            "position": {
-                "x": 4,
-                "y": 3,
-                "z": 5
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                }
-            ]
-        },
-        {
-            "$id": "15",
-            "support": 0,
-            "position": {
-                "x": 4,
-                "y": 3,
-                "z": 10
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
-        },
-        {
-            "$id": "16",
-            "support": 0,
-            "position": {
-                "x": 8,
-                "y": 3,
-                "z": 0
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
-        },
-        {
-            "$id": "17",
-            "support": 0,
-            "position": {
-                "x": 8,
-                "y": 3,
-                "z": 5
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                }
-            ]
-        },
-        {
-            "$id": "18",
-            "support": 0,
-            "position": {
-                "x": 8,
-                "y": 3,
-                "z": 10
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
-        },
-        {
-            "$id": "19",
-            "support": 0,
-            "position": {
-                "x": 10,
-                "y": 3,
-                "z": 0
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
-        },
-        {
-            "$id": "20",
-            "support": 0,
-            "position": {
-                "x": 10,
-                "y": 3,
-                "z": 5
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                }
-            ]
-        },
-        {
-            "$id": "21",
-            "support": 0,
-            "position": {
-                "x": 10,
-                "y": 3,
-                "z": 10
-            },
-            "pointLoads": [
-                {
-                    "magnitude": -0.75,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.5,
-                    "pattern": "dead"
-                }
-            ]
+            "pointLoads": []
         }
     ],
     "material": {
@@ -497,24 +128,15 @@
     "sections": [
         {
             "$id": "s1",
-            "name": "IPE 200",
-            "material": {
-                "$ref": "m"
-            }
+            "name": "IPE 200"
         },
         {
             "$id": "s2",
-            "name": "IPE 270",
-            "material": {
-                "$ref": "m"
-            }
+            "name": "IPE 270"
         },
         {
             "$id": "s3",
-            "name": "IPE 360",
-            "material": {
-                "$ref": "m"
-            }
+            "name": "IPE 360"
         }
     ],
     "secondaryBeams": [
@@ -523,45 +145,13 @@
                 "$ref": "s1"
             },
             "startNode": {
-                "$ref": "1"
-            },
-            "endNode": {
-                "$ref": "4"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "4"
+                "$ref": "5"
             },
             "endNode": {
                 "$ref": "7"
             },
-            "lineLoads": [
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                }
-            ],
-            "length": 5,
+            "lineLoads": [],
+            "length": 8,
             "innerNodes": []
         },
         {
@@ -569,22 +159,13 @@
                 "$ref": "s1"
             },
             "startNode": {
-                "$ref": "10"
+                "$ref": "9"
             },
             "endNode": {
-                "$ref": "11"
+                "$ref": "10"
             },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
+            "lineLoads": [],
+            "length": 8,
             "innerNodes": []
         },
         {
@@ -597,17 +178,8 @@
             "endNode": {
                 "$ref": "12"
             },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
+            "lineLoads": [],
+            "length": 8,
             "innerNodes": []
         },
         {
@@ -615,229 +187,13 @@
                 "$ref": "s1"
             },
             "startNode": {
-                "$ref": "13"
-            },
-            "endNode": {
-                "$ref": "14"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "14"
-            },
-            "endNode": {
-                "$ref": "15"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "2"
-            },
-            "endNode": {
-                "$ref": "5"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "5"
+                "$ref": "6"
             },
             "endNode": {
                 "$ref": "8"
             },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "16"
-            },
-            "endNode": {
-                "$ref": "17"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "17"
-            },
-            "endNode": {
-                "$ref": "18"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "19"
-            },
-            "endNode": {
-                "$ref": "20"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "20"
-            },
-            "endNode": {
-                "$ref": "21"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1.5,
-                    "pattern": "dead"
-                },
-                {
-                    "magnitude": -2,
-                    "pattern": "live"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "3"
-            },
-            "endNode": {
-                "$ref": "6"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                }
-            ],
-            "length": 5,
-            "innerNodes": []
-        },
-        {
-            "section": {
-                "$ref": "s1"
-            },
-            "startNode": {
-                "$ref": "6"
-            },
-            "endNode": {
-                "$ref": "9"
-            },
-            "lineLoads": [
-                {
-                    "magnitude": -1,
-                    "pattern": "live"
-                },
-                {
-                    "magnitude": -0.75,
-                    "pattern": "dead"
-                }
-            ],
-            "length": 5,
+            "lineLoads": [],
+            "length": 8,
             "innerNodes": []
         }
     ],
@@ -847,69 +203,6 @@
                 "$ref": "s2"
             },
             "startNode": {
-                "$ref": "1"
-            },
-            "endNode": {
-                "$ref": "2"
-            },
-            "lineLoads": [],
-            "length": 6,
-            "innerNodes": [
-                {
-                    "$ref": "10"
-                },
-                {
-                    "$ref": "13"
-                }
-            ]
-        },
-        {
-            "section": {
-                "$ref": "s2"
-            },
-            "startNode": {
-                "$ref": "2"
-            },
-            "endNode": {
-                "$ref": "3"
-            },
-            "lineLoads": [],
-            "length": 6,
-            "innerNodes": [
-                {
-                    "$ref": "16"
-                },
-                {
-                    "$ref": "19"
-                }
-            ]
-        },
-        {
-            "section": {
-                "$ref": "s2"
-            },
-            "startNode": {
-                "$ref": "4"
-            },
-            "endNode": {
-                "$ref": "5"
-            },
-            "lineLoads": [],
-            "length": 6,
-            "innerNodes": [
-                {
-                    "$ref": "11"
-                },
-                {
-                    "$ref": "14"
-                }
-            ]
-        },
-        {
-            "section": {
-                "$ref": "s2"
-            },
-            "startNode": {
                 "$ref": "5"
             },
             "endNode": {
@@ -919,10 +212,10 @@
             "length": 6,
             "innerNodes": [
                 {
-                    "$ref": "17"
+                    "$ref": "9"
                 },
                 {
-                    "$ref": "20"
+                    "$ref": "11"
                 }
             ]
         },
@@ -940,31 +233,10 @@
             "length": 6,
             "innerNodes": [
                 {
+                    "$ref": "10"
+                },
+                {
                     "$ref": "12"
-                },
-                {
-                    "$ref": "15"
-                }
-            ]
-        },
-        {
-            "section": {
-                "$ref": "s2"
-            },
-            "startNode": {
-                "$ref": "8"
-            },
-            "endNode": {
-                "$ref": "9"
-            },
-            "lineLoads": [],
-            "length": 6,
-            "innerNodes": [
-                {
-                    "$ref": "18"
-                },
-                {
-                    "$ref": "21"
                 }
             ]
         }
@@ -978,7 +250,7 @@
                 "$ref": "1"
             },
             "endNode": {
-                "$ref": "22"
+                "$ref": "5"
             },
             "lineLoads": [],
             "length": 3
@@ -991,7 +263,7 @@
                 "$ref": "2"
             },
             "endNode": {
-                "$ref": "23"
+                "$ref": "6"
             },
             "lineLoads": [],
             "length": 3
@@ -1004,7 +276,7 @@
                 "$ref": "3"
             },
             "endNode": {
-                "$ref": "24"
+                "$ref": "7"
             },
             "lineLoads": [],
             "length": 3
@@ -1017,72 +289,7 @@
                 "$ref": "4"
             },
             "endNode": {
-                "$ref": "25"
-            },
-            "lineLoads": [],
-            "length": 3
-        },
-        {
-            "section": {
-                "$ref": "s3"
-            },
-            "startNode": {
-                "$ref": "5"
-            },
-            "endNode": {
-                "$ref": "26"
-            },
-            "lineLoads": [],
-            "length": 3
-        },
-        {
-            "section": {
-                "$ref": "s3"
-            },
-            "startNode": {
-                "$ref": "6"
-            },
-            "endNode": {
-                "$ref": "27"
-            },
-            "lineLoads": [],
-            "length": 3
-        },
-        {
-            "section": {
-                "$ref": "s3"
-            },
-            "startNode": {
-                "$ref": "7"
-            },
-            "endNode": {
-                "$ref": "28"
-            },
-            "lineLoads": [],
-            "length": 3
-        },
-        {
-            "section": {
-                "$ref": "s3"
-            },
-            "startNode": {
                 "$ref": "8"
-            },
-            "endNode": {
-                "$ref": "29"
-            },
-            "lineLoads": [],
-            "length": 3
-        },
-        {
-            "section": {
-                "$ref": "s3"
-            },
-            "startNode": {
-                "$ref": "9"
-            },
-            "endNode": {
-                "$ref": "30"
             },
             "lineLoads": [],
             "length": 3
