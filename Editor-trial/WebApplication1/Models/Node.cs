@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Numerics;
 namespace WebApplication1.Models
 {
-    public class Model
+    /*public class Model
     {
         public List<Node> Nodes { get; set; }
 
@@ -86,5 +86,5 @@ namespace WebApplication1.Models
         public double TF { get; set; }
         public double IX { get; set; }
         public double TY { get; set; }
-    }
+    }*/
 }

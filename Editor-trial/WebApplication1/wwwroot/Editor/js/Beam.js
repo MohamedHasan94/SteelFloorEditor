@@ -5,24 +5,25 @@ class Beam extends FrameElement {
         let direction = (vector.clone().subVectors(endPoint, startPoint)).normalize();
         let rotation = new THREE.Euler(0, direction.angleTo(zVector), 0);
         super(sectionId, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode, direction, rotation);
-        this.data.span = endPoint.distanceTo(startPoint);
+        //this.data.span = endPoint.distanceTo(startPoint);
         this.data.innerNodes = [];
         this.visual.mesh.userData.element = this;
     }
     clone() { //Create a copy of this instance
-        return new Beam(this.data.section, this.data.startPoint.clone(), this.data.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
+        return new Beam(this.data.section, this.visual.mesh.position.clone(),
+            this.visual.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
             lineMaterial.clone(), meshMaterial.clone(), this.startNode, this.endNode);
     }
     addLoad(load, replace) {
-        let index = this.data.loads.findIndex(l => l.loadCase === load.loadCase);
+        let index = this.data.lineLoads.findIndex(l => l.pattern === load.pattern);
         if (index < 0) { //has no load of the same case(pattern)
-            this.data.loads.push(load);
-            index = this.data.loads.length - 1;
+            this.data.lineLoads.push(load);
+            index = this.data.lineLoads.length - 1;
         }
         else if (replace) //has a load of the same case(pattern) , Replace it
-            this.data.loads[index] = load;
+            this.data.lineLoads[index] = load;
         else              //has a load of the same case(pattern) , Add to it
-            this.data.loads[index].value += load.value;
+            this.data.lineLoads[index].magnitude += load.magnitude;
         return index;
     }
 }

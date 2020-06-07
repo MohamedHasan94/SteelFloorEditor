@@ -49,25 +49,26 @@ function createWireframe(startPoint, endPoint, material, rotation) { //Draw line
 class ElementData { //Data required for analysis and design
     constructor(section, startPoint, endPoint, startNode, endNode) {
         this.section = {"$ref":section};
-        this.startPoint = startPoint; //??!!
-        this.endPoint = endPoint;     //??!!
+        //this.startPoint = startPoint; //??!!
+        //this.endPoint = endPoint;     //??!!
         this.startNode = startNode ? { "$ref":startNode.data.$id } : null; // Reference to node in JSON scheme
         this.endNode = endNode ? { "$ref": endNode.data.$id } : null; // Reference to node in JSON scheme
-        this.loads = [];
+        this.lineLoads = [];
+        this.length = startPoint.distanceTo(endPoint);
     }
 }
 
 
 class ElementVisual { // Visual data for editor
-    constructor(startPoint, endPoint, shape, lineMaterial, meshMaterial, direction, rotation) {
+    constructor(startPoint, endPoint, shape, lineMaterial, meshMaterial, direction, rotation, length) {
         this.direction = direction;
         this.wireframe = createWireframe(startPoint, endPoint, lineMaterial, rotation);
-        let length = endPoint.distanceTo(startPoint);
         this.extruded = createExtrudedMesh(shape, length, meshMaterial);
         this.mesh = this.wireframe;                    //Currently rendered mesh
         this.unusedMesh = this.extruded;               // not rendered currently
         this.unusedMesh.userData = this.mesh.userData; //to save the same data at toggle view
         this.temp = null;                              //Used to Swap Meshes at tougle view
+        this.endPoint = endPoint;
     }
 }
 
@@ -77,18 +78,18 @@ class FrameElement {
         this.data = new ElementData(section, startPoint, endPoint, startNode, endNode); //Data to be sent to backend
         //Graphical representation
         this.visual = new ElementVisual(startPoint, endPoint, shape, lineMaterial, meshMaterial, direction, 
-            rotation);
+            rotation, this.data.length);
     }    
     move(displacement) {
-        this.data.startPoint.add(displacement);
-        this.data.endPoint.add(displacement);
+        //this.data.startPoint.add(displacement);
+        this.visual.endPoint.add(displacement);
         this.visual.mesh.position.add(displacement);
     }
     changeSection(section) {
         let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
         let shape = createShape(dimensions);
         this.visual.extruded.geometry.dispose();
-        extrudeSettings.depth = this.data.span ?? this.data.height;
+        extrudeSettings.depth = this.data.length;
         this.visual.extruded.geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
         this.data.section = section.$id;
     }

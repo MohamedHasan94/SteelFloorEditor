@@ -16,8 +16,7 @@ class Editor {
         this.pickingScene.background = new THREE.Color(0);
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('canvas') });
-        this.id = 0;
-        this.idToObject = [];
+        this.currentId = 0;
         this.canvas;
     }
     init() {
@@ -38,7 +37,7 @@ class Editor {
         orbitControls.mouseButtons = { // Set the functions of mouse buttons
             LEFT: THREE.MOUSE.ROTATE,
             MIDDLE: THREE.MOUSE.PAN,
-            RIGHT: THREE.MOUSE.DOLLY
+            RIGHT: THREE.MOUSE.ROTATE
         };
         //#endregion
 
@@ -57,8 +56,6 @@ class Editor {
         //Collect similar objects in groups
         this.scene.userData.elements = new THREE.Group();
         this.scene.add(this.scene.userData.elements);
-        // this.scene.userData.columns = new THREE.Group();
-        // this.scene.add(this.scene.userData.columns);
         this.scene.userData.nodes = new THREE.Group();
         this.scene.add(this.scene.userData.nodes);
         this.scene.userData.grids = new THREE.Group();
@@ -68,7 +65,6 @@ class Editor {
         this.loop();
     }
     loop() {
-        let self = this;
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(() => this.loop());
     }
@@ -94,8 +90,8 @@ class Editor {
         object.material.dispose();
     }
     createPickingObject(object) {
-        this.pickingScene.add(pickingObject(object, ++this.id));
-        this.idToObject[this.id] = object.visual;
+        this.pickingScene.add(pickingObject(object, ++this.currentId));
+        this.picker.recordObject(object, this.currentId);
     }
     toggleBeams() {
         let elements = this.scene.userData.elements;
@@ -123,13 +119,13 @@ class Editor {
         };
     }
     pick(event) {
-        this.picker.pick(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera, this.idToObject);
+        this.picker.pick(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera);
     }
-    select(event) {
-        this.picker.select(this.setPickPosition(event), this.renderer, this.pickingScene, this.camera, this.idToObject);
+    select(event, multiple) {
+        this.picker.select(this.setPickPosition(event), multiple, this.renderer, this.pickingScene, this.camera);
     }
-    selectByArea(initialPosition, finalPosition) {
-        this.picker.getObjects(initialPosition, finalPosition, this.renderer, this.pickingScene, this.camera, this.idToObject)
+    selectByArea(initialPosition, rectWidth, rectHeight, multiple) {
+        this.picker.selectByArea(initialPosition, rectWidth, rectHeight, multiple, this.renderer, this.pickingScene, this.camera)
     }
     clearGroup(group) {
         group = this.scene.userData[group];
@@ -147,5 +143,33 @@ class Editor {
             }
         }
         group.children = [];
+    }
+    darkTheme = function () {
+        this.renderer.setClearColor(0x000000);
+        light.style.display = 'block';
+        dark.style.display = 'none';
+        debugger
+        this.changeColor(0xffff00, 0x0000ff, 0xff0000);
+
+    }
+    lightTheme = function () {
+        this.renderer.setClearColor(0xdddddd);
+        dark.style.display = 'block';
+        light.style.display = 'none';
+        this.changeColor(0x000000, 0xffcc00, 0x6633ff);
+    }
+    changeColor(elementsColor, nodesColor, supportsColor) {
+        let elements = this.scene.userData.elements.children;
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].material.color.setHex(elementsColor);
+        }
+
+        let nodes = this.scene.userData.nodes.children;
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i] instanceof THREE.Mesh) //Normal Node
+                nodes[i].material.color.setHex(nodesColor);
+            else //Support
+                nodes[i].material.color.setHex(supportsColor);
+        }
     }
 }

@@ -762,12 +762,11 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		var mouseAction;
 
-		switch ( event.button ) {
-
-			case 0:
+		switch (event.button) {
+			/*case 0:
 
 				mouseAction = scope.mouseButtons.LEFT;
-				break;
+				break;*/
 
 			case 1:
 
@@ -784,7 +783,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 				mouseAction = - 1;
 
 		}
-
+		//console.log(mouseAction);
 		switch ( mouseAction ) {
 
 			case THREE.MOUSE.DOLLY:

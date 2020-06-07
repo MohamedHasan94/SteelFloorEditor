@@ -3,11 +3,11 @@ class Column extends FrameElement {
         let direction = (vector.clone().subVectors(endPoint, startPoint)).normalize();
         let rotation = new THREE.Euler(direction.angleTo(zVector), 0, 0);
         super(section, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode, direction, rotation);
-        this.data.height = endPoint.distanceTo(startPoint);
+        //this.data.height = endPoint.distanceTo(startPoint);
         this.visual.mesh.userData.element = this;
     }
     clone() { //Create a copy of this instance
-        return new Column(this.data.section, this.data.startPoint.clone(), this.data.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
+        return new Column(this.data.section, this.visual.mesh.position.clone(), this.visual.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
             lineMaterial.clone(), meshMaterial.clone(), this.startNode, this.endNode);
     }
     /*addLoad(load, replace) {
@@ -26,7 +26,7 @@ function generateColumnsX(editor, coordX, coordY, coordZ, mainNodes, section, se
     for (let i = 0; i < xNo; i++) {
 
         for (let j = 0; j < zNo; j++) {
-            let node = new Node(coordX[i], coordY, coordZ[j], 'Hinge');
+            let node = new Node(coordX[i], coordY, coordZ[j], 'Hinge'); 
             editor.addToGroup(node.visual.mesh, 'nodes');
             editor.createPickingObject(node);
             lowerNodes.push(node);
@@ -49,7 +49,7 @@ function generateColumnsZ(editor, coordX, coordY, coordZ, mainNodes, section, se
     for (let i = 0; i < zNo; i++) {
 
         for (let j = 0; j < xNo; j++) {
-            let node = new Node(coordX[j], coordY, coordZ[i], 'Hinge');
+            let node = new Node(coordX[j], coordY, coordZ[i], 1);
             editor.addToGroup(node.visual.mesh, 'nodes');
             editor.createPickingObject(node);
             lowerNodes.push(node);

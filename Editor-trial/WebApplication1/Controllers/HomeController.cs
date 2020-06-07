@@ -63,7 +63,6 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public string Read()
         {
-            //Request.EnableRewind();
 
             using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
