@@ -19,7 +19,7 @@
   transition: left 0.4s ease;
 }
 #sidebarBtn.click{
-  left: 310px;
+  left: 360px;
 }
 #sidebarBtn span{
   color: white;
@@ -31,9 +31,9 @@
 }
 .sidebar{
   position: fixed;
-  width:300px;
+  width:350px;
   height: 100%;
-  left: -300px;
+  left: -350px;
   background: #1b1b1b;
   transition: left 0.4s ease;
 }
@@ -42,8 +42,8 @@
 }
 .sidebar .text{
   color: white;
-  font-size: 25px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
   line-height: 65px;
   text-align: center;
   background: #1e1e1e;
@@ -67,12 +67,25 @@ nav ul li a{
   color: white;
   text-decoration: none;
   font-size: 18px;
+  padding-left: 20px;
+  font-weight: 500;
+  display: block;
+  width: 100%;
+  border-left: 3px solid transparent;
+}
+
+nav ul li div{
+  position: relative;
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
   padding-left: 40px;
   font-weight: 500;
   display: block;
   width: 100%;
   border-left: 3px solid transparent;
 }
+
 nav ul li.active a{
   color: cyan;
   background: #1e1e1e;
@@ -82,8 +95,8 @@ nav ul li a:hover{
   background: #1e1e1e;
 }
 nav ul ul{
-  position: static;
-  display: none;
+/*  position: static;
+*/  display: none;
 }
 nav ul .feat-show.show{
   display: block;
@@ -97,6 +110,9 @@ nav ul .loads-show.show2{
 nav ul .myModel-show.show3{
   display: block;
 }
+/*nav ul .mySelect-show.show5 {
+    display: block;
+}*/
 nav ul ul li{
   line-height: 42px;
   border-top: none;
@@ -104,7 +120,7 @@ nav ul ul li{
 nav ul ul li a{
   font-size: 17px;
   color: #e6e6e6;
-  padding-left: 80px;
+  padding-left: 40px;
 }
 nav ul li.active ul li a{
   color: #e6e6e6;
@@ -142,4 +158,34 @@ nav ul li a span.rotate{
 .content p{
   font-size: 30px;
   font-weight: 500;
+}
+
+
+#elementSecDetails {
+  display: none;
+}
+#elementMoveDetails {
+  display: none;
+}
+#elementCopyDetails {
+    display: none;
+}
+#drawElementDetails {
+    display: none;
+}
+#addNodeCoordDetails {
+    display: none;
+}
+#addNodeBeamDetails {
+    display: none;
+}
+
+#addPointLoadDetails {
+    display: none;
+}
+#addLineLoadDetails {
+    display: none;
+}
+#addFloorLoadDetails {
+    display: none;
 }

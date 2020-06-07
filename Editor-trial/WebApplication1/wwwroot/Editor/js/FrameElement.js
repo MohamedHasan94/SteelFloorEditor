@@ -48,10 +48,10 @@ function createWireframe(startPoint, endPoint, material, rotation) { //Draw line
 
 class ElementData { //Data required for analysis and design
     constructor(section, startPoint, endPoint, startNode, endNode) {
-        this.section = {"$ref":section};
+        this.section = { "$ref": section };
         //this.startPoint = startPoint; //??!!
         //this.endPoint = endPoint;     //??!!
-        this.startNode = startNode ? { "$ref":startNode.data.$id } : null; // Reference to node in JSON scheme
+        this.startNode = startNode ? { "$ref": startNode.data.$id } : null; // Reference to node in JSON scheme
         this.endNode = endNode ? { "$ref": endNode.data.$id } : null; // Reference to node in JSON scheme
         this.lineLoads = [];
         this.length = startPoint.distanceTo(endPoint);
@@ -77,13 +77,14 @@ class FrameElement {
     constructor(section, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode, direction, rotation) {
         this.data = new ElementData(section, startPoint, endPoint, startNode, endNode); //Data to be sent to backend
         //Graphical representation
-        this.visual = new ElementVisual(startPoint, endPoint, shape, lineMaterial, meshMaterial, direction, 
+        this.visual = new ElementVisual(startPoint, endPoint, shape, lineMaterial, meshMaterial, direction,
             rotation, this.data.length);
-    }    
+    }
     move(displacement) {
         //this.data.startPoint.add(displacement);
         this.visual.endPoint.add(displacement);
         this.visual.mesh.position.add(displacement);
+
     }
     changeSection(section) {
         let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);

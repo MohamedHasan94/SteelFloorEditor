@@ -8,7 +8,7 @@ class Node {
         this.data = {};
         this.data.$id = `${++id}`; //Metadata for JSON Referencing(to reference nodes in beams)
         this.data.support = support ?? 0;
-        this.data.position = new THREE.Vector3(coordX, coordY, coordZ);  //TODO : Switch Y & Z?!
+        this.data.position = new THREE.Vector3(coordX, coordY, coordZ);  //TODO : Switch Y & Z?!	
         this.data.pointLoads = [];
 
         this.visual = {};
@@ -24,26 +24,41 @@ class Node {
     }
     addLoad(load, replace) {
         let index = this.data.pointLoads.findIndex(l => l.pattern === load.pattern);
-        if (index < 0) { //has no load of the same case(pattern)
+        if (index < 0) { //has no load of the same case(pattern)	
             this.data.pointLoads.push(load);
             index = this.data.pointLoads.length - 1;
         }
-        else if (replace) //has a load of the same case(pattern) , Replace it
+        else if (replace) //has a load of the same case(pattern) , Replace it	
             this.data.pointLoads[index] = load;
-        else              //has a load of the same case(pattern) , Add to it
+        else              //has a load of the same case(pattern) , Add to it	
             this.data.pointLoads[index].magnitude += load.magnitude;
         return index;
     }
 }
 
-
-function createNodes(editor, coordX, coordZ) {
+//Naming with X or Z denotes the outer loop
+function createNodesX(editor, coordX, coordZ) {
     let nodes = [];
     let k = 0;
     for (let i = 0; i < coordX.length; i++) {
         for (let j = 0; j < coordZ.length; j++) {
 
-            nodes.push(new Node(coordX[i], 0, coordZ[j]));
+            nodes.push(new Node(coordX[i], 0, coordZ[j], 'Hinge'));
+            editor.addToGroup(nodes[k].visual.mesh, 'nodes');
+            editor.createPickingObject(nodes[k]);
+            k++;
+        }
+    }
+    return nodes;
+}
+
+function createNodesZ(editor, coordX, coordZ) {
+    let nodes = [];
+    let k = 0;
+    for (let i = 0; i < coordZ.length; i++) {
+        for (let j = 0; j < coordX.length; j++) {
+
+            nodes.push(new Node(coordX[j], 0, coordZ[i], 'Hinge'));
             editor.addToGroup(nodes[k].visual.mesh, 'nodes');
             editor.createPickingObject(nodes[k]);
             k++;

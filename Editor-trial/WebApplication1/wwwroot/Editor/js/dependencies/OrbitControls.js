@@ -783,7 +783,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 				mouseAction = - 1;
 
 		}
-		//console.log(mouseAction);
 		switch ( mouseAction ) {
 
 			case THREE.MOUSE.DOLLY:

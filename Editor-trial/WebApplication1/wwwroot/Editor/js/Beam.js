@@ -50,7 +50,7 @@ function generateMainBeamsZ(editor, coordX, coordY, coordZ, mainSection, secSect
 
     secCoord = getSecCoords(coordZ, secSpacing);
     [secBeams, secNodes] = createXBeams(editor, coordX, coordY, secCoord, secSection, coordZ, nodes, mainBeams);  //Create secondary beams on x-axis
-   
+
     return [mainBeams, secBeams, nodes, secNodes];
 }
 
@@ -62,7 +62,7 @@ function generateMainBeamsX(editor, coordX, coordY, coordZ, mainSection, secSect
 
     secCoord = getSecCoords(coordX, secSpacing);
     [secBeams, secNodes] = createZBeams(editor, secCoord, coordY, coordZ, secSection, coordX, nodes, mainBeams);  //Create secondary beams on z-axis (long direction)
-    
+
     return [mainBeams, secBeams, nodes, secNodes];
 }
 
