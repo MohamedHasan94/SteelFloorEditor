@@ -15,7 +15,6 @@
         editor = new Editor(); //Instantiate editor
         editor.init(); //Setup editor
         canvas = editor.renderer.domElement;
-        //document.body.appendChild(canvas); //Append the canvas to the Html body
 
         $('#exampleModal').modal('show'); //Temporary data input
     }
@@ -36,29 +35,19 @@
         coordX = getCoords($('#spaceX').val()); //Get X-coordinates from X-spacings
         coordZ = getCoords($('#spaceZ').val()); //Get Z-coordinates from Z-spacings
         levels = coordY = getCoords($('#spaceY').val()); //Get Y-coordinates from Y-spacings
-        //height = parseFloat($('#height').val()); //Storey height
         secSpacing = $('#secSpace').val().split(' ').map(s => parseFloat(s)); //Spacing between secondary beams
-        //secSpacing = parseFloat($('#secSpace').val()); //Spacing between secondary beams
-
-        //stories = parseFloat($('#stories').val()); //Stories no. 
-        //coordY = getElevation(stories, height); //cummulative elevation 
 
         grids = new Grid(coordX, coordZ, coordX.length, coordZ.length, 3);
         editor.addToGroup(grids.linesInX, 'grids'); //Add x-grids to scene (as a group)
         editor.addToGroup(grids.linesInZ, 'grids'); //Add z-grids to scene (as a group)
 
-
-
         if (!document.getElementById("autoMode").checked) {
-            mainNodes = createNodesZ(editor, coordX, coordZ);
-            return mainNodes;
+            nodes = createNodesZ(editor, coordX, coordZ);
         }
         else {
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
             let mainNodes = new Array(), mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop;
-            debugger
-            if (document.getElementById("xOrient").checked) {
-
+            if (document.getElementById("xOrient").checked) { //Draw main beams on X-axis
 
                 //creating and adding the Hinged-Nodes to MainNodes Array
                 lowerNodesIntial = createNodesZ(editor, coordX, coordZ);
@@ -70,13 +59,11 @@
                     [mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop] = generateMainBeamsX(editor, coordX, coordY[i], coordZ,
                         sections[1], sections[0], secSpacing); //Auto generate floor beams and nodes in X
 
-
                     nodesLoop = mainNodesLoop.concat(secNodesLoop);
                     nodes = nodes.concat(nodesLoop);
                     mainNodes.push(mainNodesLoop);
 
-                    [columnsLoop] = generateColumnsZ(editor, coordX, coordZ, mainNodes[i - 1], mainNodes[i], sections[2]); //Auto generate columns
-
+                    columnsLoop = generateColumnsZ(editor, coordX, coordZ, mainNodes[i - 1], mainNodes[i], sections[2]); //Auto generate columns
 
                     mainBeams.push(mainBeamsLoop);
                     secondaryBeams.push(secondaryBeamsLoop);
@@ -98,16 +85,13 @@
                     nodes = nodes.concat(nodesLoop);
                     mainNodes.push(mainNodesLoop);
 
-                    [columnsLoop] = generateColumnsX(editor, coordX, coordZ, mainNodes[i - 1], mainNodes[i], sections[2]); //Auto generate columns 
-
+                    columnsLoop = generateColumnsX(editor, coordX, coordZ, mainNodes[i - 1], mainNodes[i], sections[2]); //Auto generate columns 
 
                     mainBeams.push(mainBeamsLoop);
                     secondaryBeams.push(secondaryBeamsLoop);
                     columns.push(columnsLoop);
                 }
             }
-
-            console.log(mainBeams, secondaryBeams, columns, nodes);
         }
     })
 
@@ -135,39 +119,6 @@
         editor.pick(event);
     });
 
-    /*canvas.addEventListener('click', function (event) {
-        editor.select(event);
-        if (draw) {
-            if (editor.picker.selectedObject && editor.picker.selectedObject.geometry instanceof THREE.SphereBufferGeometry) {
-                drawingPoints.push(editor.picker.selectedObject.userData.node);
-                drawingPoints[0].visual.mesh.material.color.setHex(0xcc0000); //Highlight the first node
-                if (drawingPoints.length === 2) {
-                    let element;
-                    let section = $('#drawSection').val();
-                    let sectionObject = sections.find(s => s.name === section); //Check if section already exists
-                    if (!sectionObject) { //If not existing , create one
-                        sectionObject = { $id: `s${++sectionId}`, name: section };
-                        sections.push(sectionObject);
-                    }
-                    if (drawingPoints[0].data.position.x == drawingPoints[1].data.position.x &&
-                        drawingPoints[0].data.position.z == drawingPoints[1].data.position.z) { //Check if the element is vertical(column)
-                        element = drawColumnByTwoPoints(sectionObject, drawingPoints[0], drawingPoints[1]);
-                        columns.push(element);
-                    }
-                    else {//Element is not vertical (Beam)
-                        element = drawBeamByTwoPoints(sectionObject, drawingPoints[0], drawingPoints[1]);
-                        secondaryBeams.push(element);
-                    }
-                    editor.addToGroup(element.visual.mesh, 'elements');
-                    editor.createPickingObject(element);
-                    drawingPoints[0].visual.mesh.material.color.setHex(0xffcc00); //Restore the first node color
-                    editor.picker.unselect(); // Unselect the second node
-                    drawingPoints = [];
-                }
-            }
-        }
-    });*/
-    ////////////////////////////////////////////////////////
     //Try Area selection
     let initialPosition;
     let multiple = false;
@@ -178,8 +129,22 @@
     let finalPosition;
     canvas.onmouseup = function (event) {
         finalPosition = editor.setPickPosition(event);
-        if (initialPosition.x === finalPosition.x && initialPosition.y === finalPosition.y)
+        if (initialPosition.x === finalPosition.x && initialPosition.y === finalPosition.y) {
             editor.select(event, multiple);
+            if (draw) {
+                if (editor.picker.selectedObject.size == 1) {
+                    for (let item of editor.picker.selectedObject) {
+                        if (item.userData.node) {
+                            drawingPoints.push(item.userData.node);
+                            drawingPoints[0].visual.mesh.material.color.setHex(0xcc0000); //Highlight the first node
+                        }
+                    }
+                    if (drawingPoints.length === 2) {
+                        drawElement();
+                    }
+                }
+            }
+        }
         else {
             let rectWidth = Math.abs(finalPosition.x - initialPosition.x),
                 rectHeight = Math.abs(finalPosition.y - initialPosition.y);
@@ -192,6 +157,7 @@
             editor.selectByArea(initialPosition, rectWidth, rectHeight, multiple);
         }
     }
+
 
     window.addEventListener('keyup', function (event) {
         switch (event.key) {
@@ -216,6 +182,43 @@
                 break;
         }
     });
+
+    function drawElement() {
+        let element;
+        let sectionName = $('#drawSection').val();
+        let sectionObject = sections.find(s => s.name === sectionName); //Check if section already exists
+        if (!sectionObject) { //If not existing , create one
+            sectionObject = { $id: `s${++sectionId}`, name: sectionName };
+            sections.push(sectionObject);
+        }
+        let start = drawingPoints[0], end = drawingPoints[1];
+        if (drawingPoints[1].data.position.y < drawingPoints[0].data.position.y) {
+            start = drawingPoints[1];
+            end = drawingPoints[0];
+        }
+        let index = levels.indexOf(end.data.position.y) - 1;
+        if (index < 0) {
+            drawingPoints = [];
+            alert('please use one of the predefined levels');
+            return;
+        }
+        else {
+            if (start.data.position.x == end.data.position.x &&
+                start.data.position.z == end.data.position.z) { //Check if the element is vertical(column)
+                element = draolumnByTwoPoints(sectionObject, start, end);
+                columns[index].push(element);
+            }
+            else {//Element is not vertical (Beam)
+                element = drawBeamByTwoPoints(sectionObject, drawingPoints[0], drawingPoints[1]);
+                secondaryBeams[index].push(element);
+            }
+            editor.addToGroup(element.visual.mesh, 'elements');
+            editor.createPickingObject(element);
+            drawingPoints[0].visual.mesh.material.color.setHex(0xffcc00); //Restore the first node color
+            editor.picker.unselect(); // Unselect the second node
+            drawingPoints = [];
+        }
+    }
 
 
     window.onkeydown = (event) => {
@@ -283,7 +286,7 @@
 
     window.copy = function () {
         let displacement = new THREE.Vector3(parseFloat($('#xCopy').val()) || 0, parseFloat($('#yCopy').val()) || 0, parseFloat($('#zCopy').val()) || 0)
-        let replication = parseInt($('#Replication').val()); debugger
+        let replication = parseInt($('#Replication').val());
         for (let item of editor.picker.selectedObject) {
             if (item.userData.element) { //Beams or Cloumns only
                 let element = item.userData.element;
@@ -291,27 +294,32 @@
                     element = element.clone();
                     element.move(displacement);
 
-                    //Check if nodes already exist at the new position or create new ones.
-                    getElementNodes(element.visual.mesh.position, element.visual.endPoint, element);
-
                     let levelIndex = levels.indexOf(element.visual.endPoint.y) - 1;
 
-                    if (element instanceof Beam)
-                        secondaryBeams[levelIndex].push(element);
-                    else
-                        columns[levelIndex].push(element);
+                    if (levelIndex > 0) {
+                        //Check if nodes already exist at the new position or create new ones.
+                        getElementNodes(element.visual.mesh.position, element.visual.endPoint, element);
 
-                    editor.addToGroup(element.visual.mesh, 'elements');
-                    editor.createPickingObject(element);
+
+                        if (element instanceof Beam)
+                            secondaryBeams[levelIndex].push(element);
+                        else
+                            columns[levelIndex].push(element);
+
+                        editor.addToGroup(element.visual.mesh, 'elements');
+                        editor.createPickingObject(element);
+                    }
+                    else {
+                        element.move(displacement.multiplyScalar(-1));
+                        alert('please move elements to one of the predefined levels');
+                    }
                 }
             }
         }
     }
 
-
     function getElementNodes(newStartPosition, newEndPosition, element) {
         //Search for the new nodes in the existing nodes
-
         let newStartNode = nodes.find(n => n.data.position.equals(newStartPosition));
         let newEndNode = nodes.find(n => n.data.position.equals(newEndPosition));
 
@@ -343,7 +351,6 @@
 
     window.addLineLoad = function () { //Adds a LineLoad to the selected beam
         editor.clearGroup('loads');
-        debugger
         let replace = $('#replaceLineLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
         let load = new LineLoad(parseFloat($('#lineLoad').val()), $('#lineLoadCase').val());
         for (let element of editor.picker.selectedObject) {
@@ -359,7 +366,6 @@
     window.addPointLoad = function () { //Adds a PointLoad to the selected node
         editor.clearGroup('loads');
         let replace = $('#replacePointLoad').prop('checked'); //Wether to replace the existing load (if any) or add to it
-        debugger
         let pointLoad = new PointLoad(parseFloat($('#pointLoad').val()), $('#pointLoadCase').val());
         for (let element of editor.picker.selectedObject) {
             if (element.userData.node) {

@@ -37,7 +37,7 @@ function generateColumnsX(editor, coordX, coordZ, mainNodesA, mainNodesB, sectio
         }
 
     }
-    return [columns];
+    return columns;
 }
 
 function generateColumnsZ(editor, coordX, coordZ, mainNodesA, mainNodesB, section) {
@@ -58,12 +58,12 @@ function generateColumnsZ(editor, coordX, coordZ, mainNodesA, mainNodesB, sectio
         }
 
     }
-    return [columns];
+    return columns;
 }
 
 function drawColumnByTwoPoints(section, startNode, endNode) {
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
-    return new Column(section.$id, startNode.visual.mesh.position.clone(), endNode.visual.mesh.position.clone(), shape,
+    return new Column(section.$id, startNode.data.position.clone(), endNode.data.position.clone(), shape,
         lineMaterial.clone(), meshMaterial.clone(), startNode, endNode);
 }

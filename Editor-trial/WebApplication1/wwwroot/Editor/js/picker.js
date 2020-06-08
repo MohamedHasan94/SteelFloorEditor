@@ -100,11 +100,12 @@ class GPUPickHelper {
             this.selectedObject.add(object);
             object.material.color.setHex(object.material.color.getHex() + this.emissiveFlash);
             if (object.userData.element) {
+                let element = object.userData.element;
                 $('#beamSection').val(object.userData.element.data.section);
-                $('#beamStart').val(`${object.userData.element.data.startPoint.x},${object.userData.element.data.startPoint.y},${object.userData.element.data.startPoint.z}`);
-                $('#beamEnd').val(`${object.userData.element.data.endPoint.x},${object.userData.element.data.endPoint.y},${object.userData.element.data.endPoint.z}`);
-                $('#beamDead').val(object.userData.element.data.loads.dead ? object.userData.element.data.loads.dead.value : 0);
-                $('#beamLive').val(object.userData.element.data.loads.live ? object.userData.element.data.loads.live.value : 0);
+                $('#beamStart').val(`${object.position.x},${object.position.y},${object.position.z}`);
+                $('#beamEnd').val(`${element.visual.endPoint.x},${element.visual.endPoint.y},${element.visual.endPoint.z}`);
+                $('#beamDead').val(object.userData.element.data.lineLoads[0] ? object.userData.element.data.lineLoads[0].value : 0);
+                $('#beamLive').val(object.userData.element.data.lineLoads[1] ? object.userData.element.data.lineLoads[1].value : 0);
             }
         }
     }
