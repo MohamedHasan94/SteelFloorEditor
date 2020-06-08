@@ -172,4 +172,26 @@ class Editor {
                 nodes[i].material.color.setHex(supportsColor);
         }
     }
+    screenshot() {
+        let imgData;
+        try {
+            this.renderer.render(this.scene, this.camera);
+            imgData = this.canvas.toDataURL("image/jpg");
+            imgData.replace("image/jpg", "image/octet-stream");
+
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+        let link = document.createElement('a'); //Create HTML link to download the file on client machine
+        link.setAttribute('download', 'screen.jpg');
+        link.href = imgData;
+        document.body.appendChild(link);
+
+        setTimeout(function () { // domElement takes some time to be added to the document
+            link.click(); //Fire the click event of the link
+            document.body.removeChild(link); //The link is no longer needed
+        }, 1000);
+    }
 }

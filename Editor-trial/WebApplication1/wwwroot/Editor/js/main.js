@@ -46,7 +46,7 @@
         }
         else {
             sections.push({ $id: `s${++sectionId}`, name: 'IPE 200' }, { $id: `s${++sectionId}`, name: 'IPE 270' }, { $id: `s${++sectionId}`, name: 'IPE 360' });
-            let mainNodes = new Array(), mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop;
+            let mainNodes = new Array(), mainBeamsLoop, secondaryBeamsLoop, mainNodesLoop, secNodesLoop, nodesLoop;
             if (document.getElementById("xOrient").checked) { //Draw main beams on X-axis
 
                 //creating and adding the Hinged-Nodes to MainNodes Array
@@ -549,8 +549,8 @@
         //Save data on client machine if no internet connection Option #2
         let text = new Blob([createModel()], { type: 'text/json' }); //Blob : An object that represents a file
 
-        textFile = window.URL.createObjectURL(text); // The URL to that object
-
+        let textFile = window.URL.createObjectURL(text); // The URL to that object
+        
         let link = document.createElement('a'); //Create HTML link to download the file on client machine
         link.setAttribute('download', 'info.json');
         link.href = textFile;
@@ -579,5 +579,7 @@
     window.darkTheme = () => editor.darkTheme();
 
     window.lightTheme = () => editor.lightTheme();
+
+    window.screenshot = () => editor.screenshot(); 
 
 })();

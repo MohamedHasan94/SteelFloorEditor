@@ -44,7 +44,7 @@ function getSecCoords(mainCoord, secSpacing) {
 
 //Automatically generate the floor system from user's input with main beams on Z-axis (Creates the nodes with the beams)
 function generateMainBeamsZ(editor, coordX, coordY, coordZ, mainSection, secSection, secSpacing) {
-    let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [];
+    let mainBeams, secBeams, secCoord = [0], secNodes, nodes;
 
     [mainBeams, nodes] = createZBeamsWithNodes(editor, coordX, coordY, coordZ, mainSection); //Create main beams on z-axis
 
@@ -56,7 +56,7 @@ function generateMainBeamsZ(editor, coordX, coordY, coordZ, mainSection, secSect
 
 //Automatically generate the floor system from user's input with main beams on X-axis (Creates the nodes with the beams)
 function generateMainBeamsX(editor, coordX, coordY, coordZ, mainSection, secSection, secSpacing) {
-    let mainBeams = [], secBeams = [], secCoord = [0], secNodes = [];
+    let mainBeams, secBeams, secCoord = [0], secNodes, nodes;
 
     [mainBeams, nodes] = createXBeamsWithNodes(editor, coordX, coordY, coordZ, mainSection); //Create main beams on x-axis (short direction)
 
