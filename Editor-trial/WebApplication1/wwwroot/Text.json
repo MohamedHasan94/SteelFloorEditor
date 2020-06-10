@@ -8,7 +8,17 @@
                 "y": 0,
                 "z": 0
             },
-            "pointLoads": []
+            "pointLoads": [],
+            "reactions": [
+                {
+                    "pattern": "dead",
+                    "rv": 1
+                },
+                {
+                    "pattern": "live",
+                    "rv": 2
+                }
+            ]
         },
         {
             "$id": "2",
@@ -18,7 +28,17 @@
                 "y": 0,
                 "z": 0
             },
-            "pointLoads": []
+            "pointLoads": [],
+            "reactions": [
+                {
+                    "pattern": "dead",
+                    "rv": 1
+                },
+                {
+                    "pattern": "live",
+                    "rv": 2
+                }
+            ]
         },
         {
             "$id": "3",
@@ -26,9 +46,19 @@
             "position": {
                 "x": 0,
                 "y": 0,
-                "z": 8
+                "z": 5
             },
-            "pointLoads": []
+            "pointLoads": [],
+            "reactions": [
+                {
+                    "pattern": "dead",
+                    "rv": 1
+                },
+                {
+                    "pattern": "live",
+                    "rv": 2
+                }
+            ]
         },
         {
             "$id": "4",
@@ -36,89 +66,19 @@
             "position": {
                 "x": 6,
                 "y": 0,
-                "z": 8
+                "z": 5
             },
-            "pointLoads": []
-        },
-        {
-            "$id": "5",
-            "support": 0,
-            "position": {
-                "x": 0,
-                "y": 3,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "6",
-            "support": 0,
-            "position": {
-                "x": 6,
-                "y": 3,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "7",
-            "support": 0,
-            "position": {
-                "x": 0,
-                "y": 3,
-                "z": 8
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "8",
-            "support": 0,
-            "position": {
-                "x": 6,
-                "y": 3,
-                "z": 8
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "9",
-            "support": 0,
-            "position": {
-                "x": 2,
-                "y": 3,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "10",
-            "support": 0,
-            "position": {
-                "x": 2,
-                "y": 3,
-                "z": 8
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "11",
-            "support": 0,
-            "position": {
-                "x": 4,
-                "y": 3,
-                "z": 0
-            },
-            "pointLoads": []
-        },
-        {
-            "$id": "12",
-            "support": 0,
-            "position": {
-                "x": 4,
-                "y": 3,
-                "z": 8
-            },
-            "pointLoads": []
+            "pointLoads": [],
+            "reactions": [
+                {
+                    "pattern": "dead",
+                    "rv": 1
+                },
+                {
+                    "pattern": "live",
+                    "rv": 2
+                }
+            ]
         }
     ],
     "material": {
@@ -151,8 +111,80 @@
                 "$ref": "7"
             },
             "lineLoads": [],
-            "length": 8,
-            "innerNodes": []
+            "length": 5,
+            "innerNodes": [],
+            "strainingActions": [
+                {
+                    "pattern": "dead",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 3.806,
+                            "Vf" : 3.806
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 3.5681,
+                            "Vo" : 1.903,
+                            "Vf" : 1.903
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 4.7575,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 3.5681,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        },
+                        {
+                            "x" : 5,
+                            "Mo" : 0,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        }
+                    ]
+                },
+                {
+                    "pattern": "live",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 5,
+                            "Vf" : 5
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 4.6875,
+                            "Vo" : 2.5,
+                            "Vf" : 2.5
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 6.25,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 4.6875,
+                            "Vo" : -2.5,
+                            "Vf" : -2.5
+                        },
+                        {
+                            "x": 5,
+                            "Mo": 0,
+                            "Vo" : -5,
+                            "Vf" : -5
+                        }
+                    ]
+                }
+            ]
         },
         {
             "section": {
@@ -165,8 +197,80 @@
                 "$ref": "10"
             },
             "lineLoads": [],
-            "length": 8,
-            "innerNodes": []
+            "length": 5,
+            "innerNodes": [],
+            "strainingActions": [
+                {
+                    "pattern": "dead",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 3.806,
+                            "Vf" : 3.806
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 3.5681,
+                            "Vo" : 1.903,
+                            "Vf" : 1.903
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 4.7575,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 3.5681,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        },
+                        {
+                            "x" : 5,
+                            "Mo" : 0,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        }
+                    ]
+                },
+                {
+                    "pattern": "live",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 5,
+                            "Vf" : 5
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 4.6875,
+                            "Vo" : 2.5,
+                            "Vf" : 2.5
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 6.25,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 4.6875,
+                            "Vo" : -2.5,
+                            "Vf" : -2.5
+                        },
+                        {
+                            "x": 5,
+                            "Mo": 0,
+                            "Vo" : -5,
+                            "Vf" : -5
+                        }
+                    ]
+                }
+            ]
         },
         {
             "section": {
@@ -179,8 +283,80 @@
                 "$ref": "12"
             },
             "lineLoads": [],
-            "length": 8,
-            "innerNodes": []
+            "length": 5,
+            "innerNodes": [],
+            "strainingActions": [
+                {
+                    "pattern": "dead",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 3.806,
+                            "Vf" : 3.806
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 3.5681,
+                            "Vo" : 1.903,
+                            "Vf" : 1.903
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 4.7575,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 3.5681,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        },
+                        {
+                            "x" : 5,
+                            "Mo" : 0,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        }
+                    ]
+                },
+                {
+                    "pattern": "live",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 5,
+                            "Vf" : 5
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 4.6875,
+                            "Vo" : 2.5,
+                            "Vf" : 2.5
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 6.25,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 4.6875,
+                            "Vo" : -2.5,
+                            "Vf" : -2.5
+                        },
+                        {
+                            "x": 5,
+                            "Mo": 0,
+                            "Vo" : -5,
+                            "Vf" : -5
+                        }
+                    ]
+                }
+            ]
         },
         {
             "section": {
@@ -193,8 +369,80 @@
                 "$ref": "8"
             },
             "lineLoads": [],
-            "length": 8,
-            "innerNodes": []
+            "length": 5,
+            "innerNodes": [],
+            "strainingActions": [
+                {
+                    "pattern": "dead",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 3.806,
+                            "Vf" : 3.806
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 3.5681,
+                            "Vo" : 1.903,
+                            "Vf" : 1.903
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 4.7575,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 3.5681,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        },
+                        {
+                            "x" : 5,
+                            "Mo" : 0,
+                            "Vo" : -1.903,
+                            "Vf" : -1.903
+                        }
+                    ]
+                },
+                {
+                    "pattern": "live",
+                    "stations": [
+                        {
+                            "x": 0,
+                            "Mo": 0,
+                            "Vo" : 5,
+                            "Vf" : 5
+                        },
+                        {
+                            "x": 1.25,
+                            "Mo": 4.6875,
+                            "Vo" : 2.5,
+                            "Vf" : 2.5
+                        },
+                        {
+                            "x": 2.5,
+                            "Mo": 6.25,
+                            "Vo" : 0,
+                            "Vf" : 0
+                        },
+                        {
+                            "x": 3.75,
+                            "Mo": 4.6875,
+                            "Vo" : -2.5,
+                            "Vf" : -2.5
+                        },
+                        {
+                            "x": 5,
+                            "Mo": 0,
+                            "Vo" : -5,
+                            "Vf" : -5
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "mainBeams": [

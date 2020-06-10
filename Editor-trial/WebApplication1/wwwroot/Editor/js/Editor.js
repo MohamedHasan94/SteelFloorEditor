@@ -19,7 +19,8 @@ class Editor {
         this.currentId = 0;
         this.canvas;
     }
-    init() {
+    init(sections) {
+        this.picker.sections = sections;
         //#region Creating camera
         this.camera.position.set(0, 35, 70);
         this.camera.lookAt(this.scene.position); //looks at origin(0,0,0)
@@ -62,6 +63,9 @@ class Editor {
         this.scene.add(this.scene.userData.grids);
         this.scene.userData.loads = new THREE.Group();
         this.scene.add(this.scene.userData.loads);
+        this.scene.userData.results = new THREE.Group();
+        this.scene.add(this.scene.userData.results);
+
         this.loop();
     }
     loop() {
@@ -148,9 +152,7 @@ class Editor {
         this.renderer.setClearColor(0x000000);
         light.style.display = 'block';
         dark.style.display = 'none';
-        debugger
         this.changeColor(0xffff00, 0x0000ff, 0xff0000);
-
     }
     lightTheme = function () {
         this.renderer.setClearColor(0xdddddd);
@@ -193,5 +195,20 @@ class Editor {
             link.click(); //Fire the click event of the link
             document.body.removeChild(link); //The link is no longer needed
         }, 1000);
+    }
+    getIntersected(position) {
+        let widthHalf = window.innerWidth / 2, heightHalf = window.innerHeight / 2;
+        position.project(this.camera); //Project the 3D world position on the screen
+        //The resulting position is between[-1,1] WebGl coordinates with the origin at the screen center
+        //Switch position to screen position with the origin at the top left corner
+        position.x = (position.x * widthHalf) + widthHalf;
+        position.y = - (position.y * heightHalf) + heightHalf;
+        //remove nodes from picking pickingScene
+        let temp = this.pickingScene.children;
+        this.pickingScene.children = this.scene.userData.elements.children.map(c => c.userData.picking);
+        //Read the position using the GPUPicker
+        let pickeckedMesh = this.picker.getObject(position, this.renderer, this.pickingScene, this.camera);
+        this.pickingScene.children = temp;
+        return pickeckedMesh;
     }
 }

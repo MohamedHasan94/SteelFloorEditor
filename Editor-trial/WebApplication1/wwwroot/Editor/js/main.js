@@ -13,22 +13,12 @@
 
     function init() {
         editor = new Editor(); //Instantiate editor
-        editor.init(); //Setup editor
+        editor.init(sections); //Setup editor
         canvas = editor.renderer.domElement;
 
         $('#exampleModal').modal('show'); //Temporary data input
     }
-
-    $(document).ready();
-
-    $("#manMode").click(function () { //Hide Auto mode data if Manual mode selected
-        $("#autoModeData").fadeOut();
-    });
-
-    $("#autoMode").click(function () { //Show Auto mode data if Manual mode selected
-        $("#autoModeData").fadeIn();
-    });
-
+        
     $('#createGrids').click(function () {
         $('#exampleModal').modal('hide');
         let secSpacing, coordX, coordZ;
@@ -203,9 +193,18 @@
             return;
         }
         else {
+            let beam = editor.getIntersected(start.data.position.clone(), start.visual.mesh.userData.picking);
+            if (beam) {
+                Beam.switchType(beam.userData.element, secondaryBeams[index], mainBeams[index]);
+            }
+            beam = editor.getIntersected(end.data.position.clone(), end.visual.mesh.userData.picking);
+            if (beam) {
+                Beam.switchType(beam.userData.element, secondaryBeams[index], mainBeams[index]);
+            }
+
             if (start.data.position.x == end.data.position.x &&
                 start.data.position.z == end.data.position.z) { //Check if the element is vertical(column)
-                element = draolumnByTwoPoints(sectionObject, start, end);
+                element = drawColumnByTwoPoints(sectionObject, start, end);
                 columns[index].push(element);
             }
             else {//Element is not vertical (Beam)
@@ -231,19 +230,19 @@
             if (item.userData.element instanceof Beam) {
                 editor.removeFromGroup(item, 'elements');
                 let found = false;
-                for (var i = 0; i < mainBeams.length; i++) {
-                    let index = mainBeams[i].indexOf(item.userData.element);
+                for (var i = 0; i < secondaryBeams.length; i++) {
+                    index = secondaryBeams[i].indexOf(item.userData.element);
                     if (index > -1) {
-                        mainBeams[i].splice(index, 1);
+                        secondaryBeams[i].splice(index, 1);
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
-                    for (var i = 0; i < secondaryBeams.length; i++) {
-                        index = secondaryBeams[i].indexOf(item.userData.element);
+                    for (var i = 0; i < mainBeams.length; i++) {
+                        let index = mainBeams[i].indexOf(item.userData.element);
                         if (index > -1) {
-                            secondaryBeams[i].splice(index, 1);
+                            mainBeams[i].splice(index, 1);                           
                             break;
                         }
                     }
@@ -275,11 +274,16 @@
                 item.userData.element.move(displacement);
                 let newStartPosition = item.position;
                 let newEndPosition = item.userData.element.visual.endPoint;
-
-                //Check if nodes already exist at the new position or create new ones.
-                console.log(item.userData.element);
-                getElementNodes(newStartPosition, newEndPosition, item.userData.element);
-                item.userData.picking.position.copy(newStartPosition);
+                let levelIndex = levels.indexOf(newEndPosition.y) - 1;
+                if (levelIndex > -1) {
+                    //Check if nodes already exist at the new position or create new ones.
+                    getElementNodes(newStartPosition, newEndPosition, item.userData.element, levelIndex);
+                    item.userData.picking.position.copy(newStartPosition);
+                }
+                else {
+                    item.userData.element.move(displacement.multiplyScalar(-1));
+                    alert('please move elements to one of the predefined levels');
+                }                
             }
         }
     }
@@ -296,9 +300,9 @@
 
                     let levelIndex = levels.indexOf(element.visual.endPoint.y) - 1;
 
-                    if (levelIndex > 0) {
+                    if (levelIndex > -1) {
                         //Check if nodes already exist at the new position or create new ones.
-                        getElementNodes(element.visual.mesh.position, element.visual.endPoint, element);
+                        getElementNodes(element.visual.mesh.position, element.visual.endPoint, element, levelIndex);
 
 
                         if (element instanceof Beam)
@@ -318,7 +322,7 @@
         }
     }
 
-    function getElementNodes(newStartPosition, newEndPosition, element) {
+    function getElementNodes(newStartPosition, newEndPosition, element, levelIndex) {
         //Search for the new nodes in the existing nodes
         let newStartNode = nodes.find(n => n.data.position.equals(newStartPosition));
         let newEndNode = nodes.find(n => n.data.position.equals(newEndPosition));
@@ -327,9 +331,17 @@
             newStartNode = Node.create(newStartPosition.x, newStartPosition.y, newStartPosition.z,
                 null, editor, nodes);
         }
+
+        let beam = editor.getIntersected(newStartNode.data.position.clone());
+        if (beam)
+            Beam.switchType(beam.userData.element, secondaryBeams[levelIndex], mainBeams[levelIndex]);
+
         if (!newEndNode) {//If it doesn't exist create one
             newEndNode = Node.create(newEndPosition.x, newEndPosition.y, newEndPosition.z, null, editor, nodes);
         }
+        beam = editor.getIntersected(newEndNode.data.position.clone());
+        if (beam)
+            Beam.switchType(beam.userData.element, secondaryBeams[levelIndex], mainBeams[levelIndex]);
 
         element.data.startNode = { "$ref": newStartNode.data.$id };
         element.data.endNode = { "$ref": newEndNode.data.$id };
@@ -342,7 +354,6 @@
     window.addFloorLoad = function () {
         let load = new LineLoad($('#floorLoadCase').val(), this.parseFloat($('#floorLoad').val()));
         editor.clearGroup('loads');
-        debugger
         for (let i = 0; i < secondaryBeams.length; i++) { //(for) is faster than (forEach)
             let index = secondaryBeams[i].addLoad(load, true);
             editor.addToGroup(secondaryBeams[i].data.loads[index].render(secondaryBeams[i]), 'loads');
@@ -425,16 +436,17 @@
 
     window.addNodeToBeam = function () {
         let distances = $('#nodeToBeam').val().split(',').map(d => this.parseFloat(d));
-        let element;
+        let element, createdNode;
         for (let item of editor.picker.selectedObject) {
             if (item.userData.element instanceof Beam) {
-                element = item.userData.element;
+                element = item.userData.element;                
                 for (var i = 0; i < distances.length; i++) {
                     let displacement = element.visual.direction.clone().multiplyScalar(distances[i]);
                     let nodePosition = item.position.clone().add(displacement);
 
-                    Node.create(nodePosition.x, nodePosition.y, nodePosition.z,
+                    createdNode = Node.create(nodePosition.x, nodePosition.y, nodePosition.z,
                         null, editor, nodes);
+                    element.data.innerNodes.push({ $ref: createdNode.data.$id });
                 }
             }
         }
@@ -444,33 +456,19 @@
         let node = Node.create(parseFloat($('#nodeXCoord').val()),
             parseFloat($('#nodeYCoord').val()), parseFloat($('#nodeZCoord').val()), null, editor, nodes);
 
-        let beam = getIntersectedBeam(node.data.position.clone()); //Beam mesh
+        let beam = editor.getIntersected(node.data.position.clone()); //Beam mesh
         if (beam && beam.userData.element instanceof Beam) {
-            beam = beam.userData.element; //Beam object
-            let index = secondaryBeams.indexOf(beam);
-            if (index > -1) { // the beam is secondary , switch it to main 
-                secondaryBeams.splice(index, 1);
-                mainBeams.push(beam);
-            }
-
+            beam = beam.userData.element; 
             beam.data.innerNodes.push({ "$ref": node.data.$id }); //Add the node to the beam inner nodes
         }
-    }
-
-    function getIntersectedBeam(position) { //Checks if a beam exists at the node position 
-        let widthHalf = window.innerWidth / 2, heightHalf = window.innerHeight / 2;
-        position.project(editor.camera); //Project the 3D world position on the screen
-        //The resulting position is between[-1,1] WebGl coordinates with the origin at the screen center
-        //Switch position to screen position with the origin at the top left corner
-        position.x = (position.x * widthHalf) + widthHalf;
-        position.y = - (position.y * heightHalf) + heightHalf;
-        //Read the position using the GPUPicker
-        return editor.picker.getObject(position, editor.renderer, editor.pickingScene, editor.camera, editor.idToObject);
     }
 
     window.startDrawMode = () => draw = true;
     window.endDrawMode = () => {
         draw = false;
+        if (drawingPoints[0])
+            drawingPoints[0].visual.mesh.material.color.setHex(0xffcc00); //Restore the first node color
+
         drawingPoints = [];
     }
 
@@ -563,7 +561,6 @@
         }, 1000);
     }
 
-
     $('#upload').change(function (event) { //Read data from uploaded file
         debugger
         let file = event.target.files[0];
@@ -573,7 +570,7 @@
             console.log(obj);
         };
         reader.readAsText(file);
-    })
+    });
 
     //used to toggle between dark and light themes
     window.darkTheme = () => editor.darkTheme();
@@ -582,4 +579,27 @@
 
     window.screenshot = () => editor.screenshot(); 
 
+    $('#reactions').change((event) => {
+        let file = event.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function (evt) {
+            let model = JSON.parse(evt.target.result);
+            for (let i = 0; i < 4; i++) {
+                nodes[i].visual.reactions = model.nodes[i].reactions;
+                editor.addToGroup(nodes[i].showReaction('dead'), 'results');
+                secondaryBeams[0][i].visual.strainingActions = model.secondaryBeams[i].strainingActions;
+                editor.addToGroup(secondaryBeams[0][i].showResult('dead','Mo'), 'results');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    window.result = () => {
+        editor.clearGroup('results');
+        let pattern = $('#resultPattern').val();
+        for (let i = 0; i < 4; i++) {
+            editor.addToGroup(nodes[i].showReaction(pattern), 'results');
+            editor.addToGroup(secondaryBeams[0][i].showResult('live','Mo'), 'results');
+        }
+    };
 })();

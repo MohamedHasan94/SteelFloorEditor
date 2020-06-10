@@ -18,7 +18,7 @@ class Node {
         }
         else {
             this.visual.mesh = new THREE.Mesh(nodeGeometry, nodeMaterial.clone());
-            this.visual.mesh.position.set(coordX, coordY , coordZ);
+            this.visual.mesh.position.set(coordX, coordY, coordZ);
         }
         this.visual.mesh.userData.node = this;
     }
@@ -33,6 +33,22 @@ class Node {
         else              //has a load of the same case(pattern) , Add to it	
             this.data.pointLoads[index].magnitude += load.magnitude;
         return index;
+    }
+    showReaction(pattern) {
+        let reaction = this.visual.reactions.find(r => r.pattern == pattern);
+        let position = this.visual.mesh.position.clone();
+        position.y -= 1.15;
+        let arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), position, 1, 0xcc00ff);
+        let textGeometry = new THREE.TextBufferGeometry(`${reaction.rv}`, {
+            font: myFont,
+            size: 0.2,
+            height: 0,
+            curveSegments: 3,
+            bevelEnabled: false
+        });
+        let text = new THREE.Mesh(textGeometry, fontMaterial);
+        arrow.add(text);
+        return arrow;
     }
     static create(coordX, coordY, coordZ, support, editor, nodes) { //Static method to handle node creation, 
         let node = new Node(coordX, coordY, coordZ, support);       // recording, visualization 

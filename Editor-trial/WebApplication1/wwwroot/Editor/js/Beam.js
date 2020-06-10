@@ -1,16 +1,16 @@
 let vector = new THREE.Vector3();
 let zVector = new THREE.Vector3(0, 0, 1);
 class Beam extends FrameElement {
-    constructor(sectionId, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode) {
+    constructor(section, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode) {
         let direction = (vector.clone().subVectors(endPoint, startPoint)).normalize();
         let rotation = new THREE.Euler(0, direction.angleTo(zVector), 0);
-        super(sectionId, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode, direction, rotation);
+        super(section, startPoint, endPoint, shape, lineMaterial, meshMaterial, startNode, endNode, direction, rotation);
         //this.data.span = endPoint.distanceTo(startPoint);
         this.data.innerNodes = [];
         this.visual.mesh.userData.element = this;
     }
     clone() { //Create a copy of this instance
-        return new Beam(this.data.section, this.visual.mesh.position.clone(),
+        return new Beam({ $id: this.data.section.$ref, name: this.visual.sectionName }, this.visual.mesh.position.clone(),
             this.visual.endPoint.clone(), this.visual.extruded.geometry.parameters.shapes,
             lineMaterial.clone(), meshMaterial.clone(), this.startNode, this.endNode);
     }
@@ -26,6 +26,30 @@ class Beam extends FrameElement {
             this.data.lineLoads[index].magnitude += load.magnitude;
         return index;
     }
+    showResult(pattern, action) {
+        let stations = this.visual.strainingActions.find(sa => sa.pattern == pattern).stations;
+        //if (action == 'moment') {
+            let shape = new THREE.Shape();
+            for (let i = 0; i < stations.length; i++) {
+                shape.lineTo(stations[i].x, stations[i][action]*-0.25);
+            }
+            shape.lineTo(this.data.length, 0);
+            let geometry = new THREE.ShapeBufferGeometry(shape);
+            let material = new THREE.MeshBasicMaterial({ color: 0x00ff00,transparent : true, opacity : 0.3,  side: THREE.DoubleSide});
+            let mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.copy(this.visual.mesh.rotation);
+            mesh.rotation.y -= 0.5*Math.PI;
+            mesh.position.copy(this.visual.mesh.position);
+            return mesh;
+        //}
+    }
+    static switchType(beam, type1, type2) {//Switches the beam from main to secondary and vice versa
+        let beamIndex = type1.indexOf(beam);
+        if (beamIndex > -1) {
+            type1.splice(beamIndex, 1);
+            type2.push(beam);
+        }
+    }
 }
 
 //Calculate the starting coords of secondary beams
@@ -35,7 +59,8 @@ function getSecCoords(mainCoord, secSpacing) {
 
     for (var i = 1; i < number; i++) {
         while (sum < mainCoord[i]) {
-            sum += secSpacing[i - 1] ?? secSpacing[0];
+            sum = 10*sum + 10 * (secSpacing[i - 1] ?? secSpacing[0]);
+            sum /= 10;
             coord.push(sum);
         }
     }
@@ -77,38 +102,41 @@ function createXBeams(editor, coordX, coordY, coordZ, section, coordZToCheck, no
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
 
-    let k = 0, m = 0, a = -1;
-    let n = (coordZ.length - 1) / (coordZToCheck.length - 1); // Counters to relate beams and nodes
+    let m = 0, a = -1, e = 1, createNode = false;
     let node1, node2;
     for (let i = 0; i < coordZ.length; i++) {
-
-        if ((coordZToCheck[i / n]) / coordZ[i] != 1 && (coordZToCheck[i / n]) / (coordZ[i] + 1) != 0) {
+        if (coordZToCheck[e] / coordZ[i] != 1 && coordZ[i]) {
             //Craete a start node for this line
             m++;
-            node1 = Node.create(coordX[0], coordY, coordZ[i], null, editor, secBeamsNodes);
-            mainBeams[(i - m)].data.innerNodes.push({ "$ref": node1.data.$id });
-            k++;
+            node2 = Node.create(coordX[0], coordY, coordZ[i], null, editor, secBeamsNodes);
+            mainBeams[(i - m)].data.innerNodes.push({ "$ref": node2.data.$id });
+            createNode = true;
         }
-        else { a++; }
+        else {
+            a++;
+            createNode = false;
+        }
 
         for (let j = 0; j < coordX.length - 1; j++) {
             let beam;
-            if ((coordZToCheck[i / n]) / coordZ[i] == 1 || (coordZToCheck[i / n]) / (coordZ[i] + 1) == 0) {
-                beam = new Beam(section.$id, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
-                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordZToCheck.length * j + a], nodes[coordZToCheck.length * (j + 1) + a]);
-            }
-            else {
+            if (createNode) {
+                node1 = node2;
                 node2 = Node.create(coordX[j + 1], coordY, coordZ[i], null, editor, secBeamsNodes);
 
-                beam = new Beam(section.$id, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
+                beam = new Beam(section, node1.data.position.clone(), node2.data.position.clone(),
                     shape, lineMaterial.clone(), meshMaterial.clone(), node1, node2);
+
                 mainBeams[((coordZToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": node2.data.$id });
-                k++;
+            }
+            else {
+                beam = new Beam(section, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
+                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordZToCheck.length * j + a], nodes[coordZToCheck.length * (j + 1) + a]);
             }
             beams.push(beam);
             editor.addToGroup(beam.visual.mesh, 'elements');
             editor.createPickingObject(beam);
         }
+        e += parseInt(coordZ[i] / coordZToCheck[e]); //Check if entered the next main spacing
     }
     return [beams, secBeamsNodes];
 }
@@ -120,43 +148,41 @@ function createZBeams(editor, coordX, coordY, coordZ, section, coordXToCheck, no
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
 
-    let k = 0, m = 0, a = -1;
-    let n = (coordX.length - 1) / (coordXToCheck.length - 1);
-
+    let m = 0, a = -1, e = 1, createNode = false;
+    let node1, node2;
     for (let i = 0; i < coordX.length; i++) {
-
-        if ((coordXToCheck[i / n]) / coordX[i] != 1 && (coordXToCheck[i / n]) / (coordX[i] + 1) != 0) {
+        if (coordXToCheck[e] / coordX[i] != 1 && coordX[i]) {
+            //Craete a start node for this line
             m++;
-            let node = Node.create(coordX[i], coordY, coordZ[0], null, editor, secBeamsNodes);
-            /*secBeamsNodes.push(new Node(coordX[i], coordY, coordZ[0]));
-            editor.addToGroup(secBeamsNodes[k].visual.mesh, 'nodes');
-            editor.createPickingObject(secBeamsNodes[k]);*/
-            mainBeams[(i - m)].data.innerNodes.push({ "$ref": node.data.$id });
-            k++;
+            node2 = Node.create(coordX[i], coordY, coordZ[0], null, editor, secBeamsNodes);
+            mainBeams[(i - m)].data.innerNodes.push({ "$ref": node2.data.$id });
+            createNode = true;
         }
-        else { a++; }
+        else {
+            a++;
+            createNode = false;
+        }
 
         for (let j = 0; j < coordZ.length - 1; j++) {
             let beam;
-            if ((coordXToCheck[i / n]) / coordX[i] == 1 || (coordXToCheck[i / n]) / (coordX[i] + 1) == 0) {
-                beam = new Beam(section.$id, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
-                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordXToCheck.length * j + a], nodes[coordXToCheck.length * (j + 1) + a]);
-            }
-            else {
-                let node = Node.create(coordX[i], coordY, coordZ[j + 1], null, editor, secBeamsNodes);
-                /*secBeamsNodes.push(new Node(coordX[i], coordY, coordZ[j + 1]));
-                editor.addToGroup(secBeamsNodes[k].visual.mesh, 'nodes');
-                editor.createPickingObject(secBeamsNodes[k]);*/
-                beam = new Beam(section.$id, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
-                    shape, lineMaterial.clone(), meshMaterial.clone(), secBeamsNodes[k - 1], secBeamsNodes[k]);
+            if (createNode) {
+                node1 = node2;
+                node2 = Node.create(coordX[i], coordY, coordZ[j + 1], null, editor, secBeamsNodes);
 
-                mainBeams[((coordXToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": node.data.$id });
-                k++;
+                beam = new Beam(section, node1.data.position.clone(), node2.data.position.clone(),
+                    shape, lineMaterial.clone(), meshMaterial.clone(), node1, node2);
+
+                mainBeams[((coordXToCheck.length - 1) * (j + 1)) + (i - m)].data.innerNodes.push({ "$ref": node2.data.$id });
             }
+            else{
+                beam = new Beam(section, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
+                    shape, lineMaterial.clone(), meshMaterial.clone(), nodes[coordXToCheck.length * j + a], nodes[coordXToCheck.length * (j + 1) + a]);
+            }                        
             beams.push(beam);
             editor.addToGroup(beam.visual.mesh, 'elements');
             editor.createPickingObject(beam);
         }
+        e += parseInt(coordX[i] / coordXToCheck[e]); //Check if entered the next main spacing
     }
     return [beams, secBeamsNodes];
 }
@@ -177,7 +203,7 @@ function createZBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
         for (let j = 0; j < coordZ.length - 1; j++) {
             Node.create(coordX[i], coordY, coordZ[j + 1], null, editor, nodes);
 
-            let beam = new Beam(section.$id, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
+            let beam = new Beam(section, new THREE.Vector3(coordX[i], coordY, coordZ[j]), new THREE.Vector3(coordX[i], coordY, coordZ[j + 1]),
                 shape, lineMaterial.clone(), meshMaterial.clone(), nodes[k - 1], nodes[k]);
             beams.push(beam);
             editor.addToGroup(beam.visual.mesh, 'elements');
@@ -196,7 +222,6 @@ function createXBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
 
     let nodes = [];
     let k = 0;
-
     for (let i = 0; i < coordZ.length; i++) {
         Node.create(coordX[0], coordY, coordZ[i], null, editor, nodes);
         k++;
@@ -204,7 +229,7 @@ function createXBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
         for (let j = 0; j < coordX.length - 1; j++) {
             Node.create(coordX[j + 1], coordY, coordZ[i], null, editor, nodes);
 
-            let beam = new Beam(section.$id, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
+            let beam = new Beam(section, new THREE.Vector3(coordX[j], coordY, coordZ[i]), new THREE.Vector3(coordX[j + 1], coordY, coordZ[i]),
                 shape, lineMaterial.clone(), meshMaterial.clone(), nodes[k - 1], nodes[k]);
             beams.push(beam);
             editor.addToGroup(beam.visual.mesh, 'elements');
@@ -219,6 +244,6 @@ function createXBeamsWithNodes(editor, coordX, coordY, coordZ, section) {
 function drawBeamByTwoPoints(section, startNode, endNode) {
     let dimensions = new SectionDimensions(parseInt(section.name.split(' ')[1]) / 1000);
     let shape = createShape(dimensions);
-    return new Beam(section.$id, startNode.visual.mesh.position.clone(), endNode.visual.mesh.position.clone(), shape,
+    return new Beam(section, startNode.visual.mesh.position.clone(), endNode.visual.mesh.position.clone(), shape,
         lineMaterial.clone(), meshMaterial.clone(), startNode, endNode);
 }

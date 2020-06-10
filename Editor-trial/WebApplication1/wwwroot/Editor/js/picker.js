@@ -101,11 +101,12 @@ class GPUPickHelper {
             object.material.color.setHex(object.material.color.getHex() + this.emissiveFlash);
             if (object.userData.element) {
                 let element = object.userData.element;
-                $('#beamSection').val(object.userData.element.data.section);
+                //let name = this.sections.find(s => s.$id == element.data.section.$ref).name;
+                $('#beamSection').val(element.visual.sectionName);
                 $('#beamStart').val(`${object.position.x},${object.position.y},${object.position.z}`);
                 $('#beamEnd').val(`${element.visual.endPoint.x},${element.visual.endPoint.y},${element.visual.endPoint.z}`);
-                $('#beamDead').val(object.userData.element.data.lineLoads[0] ? object.userData.element.data.lineLoads[0].value : 0);
-                $('#beamLive').val(object.userData.element.data.lineLoads[1] ? object.userData.element.data.lineLoads[1].value : 0);
+                $('#beamDead').val(object.userData.element.data.lineLoads[0] ? object.userData.element.data.lineLoads[0].magnitude : 0);
+                $('#beamLive').val(object.userData.element.data.lineLoads[1] ? object.userData.element.data.lineLoads[1].magnitude : 0);
             }
         }
     }
